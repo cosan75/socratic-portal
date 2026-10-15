@@ -258,7 +258,7 @@ function render(){
 function updateOut(){
   const clean=x=>String(x).replace(/[|\n]/g,"/").trim();
   const best=st.turns.reduce((a,t)=>T[t.type].lv>=T[a.type].lv?t:a,st.turns[0]);
-  $("out").textContent=`⟦질문⟧ ${clean(st.name||"이름없음")} | ${best.type} | ${clean(best.q)} | ${st.turns.map(t=>t.type).join(">")}`+(($("reflect").value||"").trim()?`\n성찰: ${clean($("reflect").value)}`:"");
+  $("out").textContent=`⟦질문⟧ ${clean(st.name||"이름없음")} | ${best.type} | ${clean(best.q)} | ${st.turns.map(t=>t.type).join(">")} | athens`+(($("reflect").value||"").trim()?`\n성찰: ${clean($("reflect").value)}`:"");
 }
 $("askBtn").onclick=()=>{
   const q=$("q").value.trim();const m=$("msg");

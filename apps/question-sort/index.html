@@ -196,7 +196,7 @@ function drawMine(){
   $("mine").querySelectorAll(".oc").forEach(b=>b.onclick=()=>{edit();const q=S.mine[+b.dataset.i];q.oc=b.dataset.oc;if(q.oc==="closed")delete q.k;save();drawAll()});
   $("mine").querySelectorAll(".pk").forEach(b=>b.onclick=()=>{edit();S.mine[+b.dataset.i].k=b.dataset.k;save();drawAll()});
   const clean=x=>String(x).replace(/[|\n]/g,"/").trim();
-  const lines=S.mine.filter(q=>q.k).map(q=>`⟦질문⟧ ${clean(S.name||"이름없음")} | ${q.k} | ${clean(q.t)} | ${q.k}`);
+  const lines=S.mine.filter(q=>q.k).map(q=>`⟦질문⟧ ${clean(S.name||"이름없음")} | ${q.k} | ${clean(q.t)} | ${q.k} | sort`);
   $("out").textContent=lines.length?lines.join("\n"):"아직 카드를 붙인 열린 질문이 없어요.";
 }
 function edit(){if(S.example){S.example=false}}

@@ -1,0 +1,618 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>질문 성장 리포트</title>
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: 교사용 기록장. 위 머리띠(자료 출처 배지·내보내기), 탭 4개(학급 요약/학생별 피드백/자료 넣기/점검지). 요약은 지표 줄 → 2열 차트 → 수업 처방 */
+:root{
+  --bg:#eef0ec;--panel:#f8f9f6;--ink:#1f2a2a;--muted:#5f6b69;--line:#c9cfc9;--grid:#dde1dc;
+  --aegean:#1f5f8b;--aegean-soft:#d6e5ef;--olive:#6b7a3a;--olive-soft:#e8ecd9;--ochre:#b8862b;--ochre-soft:#f5ead3;--warn:#9a4a1f;
+  --s1:#a9cbe3;--s2:#5b97c4;--s3:#1f5f8b;--pre:#9aa39f;
+  --display:"Gowun Batang","Nanum Myeongjo",serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;--grid:#2a3434;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--olive-soft:#262d1d;--ochre:#d9ac55;--ochre-soft:#2e2717;--warn:#e19a6f;
+  --s1:#2b4c63;--s2:#4a87b5;--s3:#8cc2e6;--pre:#6b7673;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;--grid:#2a3434;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--olive-soft:#262d1d;--ochre:#d9ac55;--ochre-soft:#2e2717;--warn:#e19a6f;
+  --s1:#2b4c63;--s2:#4a87b5;--s3:#8cc2e6;--pre:#6b7673;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 48px}
+.wrap{max-width:1180px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{font-family:var(--display);margin:0;font-weight:700}
+h1{font-size:1.75rem}
+h2{font-size:1.1rem}
+h3{font-size:.98rem}
+p{margin:0}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--aegean);outline-offset:2px}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 9px;max-width:100%}
+textarea{width:100%;resize:vertical}
+.eyebrow{font-size:.74rem;letter-spacing:.07em;color:var(--muted)}
+.note{font-size:.8rem;color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--bg);padding:7px 13px;border-radius:6px;font-size:.88rem;white-space:nowrap}
+.btn:hover{border-color:var(--aegean)}
+.btn.primary{background:var(--aegean);border-color:var(--aegean);color:var(--panel)}
+.btn.danger{color:var(--warn)}
+.btn.sm{padding:4px 9px;font-size:.8rem}
+header{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--line);padding-bottom:12px}
+.src{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.badge{font-size:.72rem;border:1px solid var(--line);border-radius:999px;padding:1px 9px;color:var(--muted);background:var(--panel)}
+.badge.on{border-color:var(--olive);color:var(--olive);background:var(--olive-soft)}
+.badge.demo{border-color:var(--ochre);color:var(--ochre);background:var(--ochre-soft)}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:transparent;padding:6px 14px;border-radius:999px;font-size:.88rem}
+.tab[aria-selected="true"]{background:var(--aegean);color:var(--panel);border-color:var(--aegean)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px}
+@media (max-width:1000px){.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:520px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi b{font-family:var(--display);font-size:1.75rem;line-height:1.1;font-variant-numeric:tabular-nums}
+.kpi b small{font-size:.55em;color:var(--muted);font-family:var(--body);font-weight:500}
+.kpi span{font-size:.78rem;color:var(--muted)}
+.kpi .delta{font-size:.76rem;color:var(--olive)}
+.kpi .delta.down{color:var(--warn)}
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}
+
+/* 차트 */
+.seg{display:flex;height:34px;border-radius:6px;overflow:hidden;gap:2px;background:var(--panel)}
+.seg div{display:grid;place-items:center;font-size:.8rem;font-weight:600;min-width:0;color:var(--ink)}
+.seg div.dark{color:#fff}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem;color:var(--muted)}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.bars{display:flex;flex-direction:column;gap:7px}
+.bar{display:grid;grid-template-columns:7.5em minmax(0,1fr) 2.6em;gap:10px;align-items:center;font-size:.85rem}
+.bar .track{height:14px;background:transparent;border-left:1px solid var(--line);position:relative}
+.bar .fill{height:100%;border-radius:0 4px 4px 0;background:var(--c,var(--aegean))}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--muted)}
+.bar .lab{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fl{display:inline-block;font-size:.72rem;border-radius:999px;padding:0 8px;line-height:1.6;white-space:nowrap}
+.fl1{background:var(--s1);color:var(--ink)}.fl2{background:var(--s2);color:#fff}.fl3{background:var(--s3);color:#fff}
+:root[data-theme="dark"] .fl1{color:var(--ink)}
+.flnone{border:1px solid var(--line);color:var(--muted)}
+svg text{font-family:var(--body)}
+.chartbox{overflow-x:auto}
+.status{display:flex;flex-direction:column;gap:6px}
+.st{display:grid;grid-template-columns:2em minmax(0,1fr) auto;gap:10px;align-items:center;font-size:.86rem;border-bottom:1px dashed var(--line);padding-bottom:6px}
+.st .n{font-family:var(--display);color:var(--aegean);font-size:1.05rem}
+.pill{font-size:.72rem;border-radius:999px;padding:1px 9px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.ok{border-color:var(--olive);color:var(--olive);background:var(--olive-soft)}
+.rx{display:flex;flex-direction:column;gap:8px}
+.rx li{list-style:none;border-left:3px solid var(--ochre);background:var(--ochre-soft);padding:8px 12px;border-radius:0 6px 6px 0;font-size:.88rem}
+.rx ul{margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+
+/* 학생별 */
+.filters{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chipbtn{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:3px 11px;font-size:.82rem}
+.chipbtn[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.stable{width:100%;border-collapse:collapse;font-size:.86rem;font-variant-numeric:tabular-nums}
+.stable th{font-size:.74rem;color:var(--muted);font-weight:500;text-align:left;border-bottom:1px solid var(--ink);padding:6px 8px;white-space:nowrap}
+.stable td{border-bottom:1px solid var(--line);padding:7px 8px;vertical-align:middle}
+.stable tr.srow{cursor:pointer}
+.stable tr.srow:hover td{background:var(--bg)}
+.stable tr.open td{background:var(--aegean-soft)}
+.glyphs{display:inline-flex;gap:2px;font-size:.95rem;letter-spacing:0}
+.glyphs span.off{opacity:.18;filter:grayscale(1)}
+.trail{font-size:.9rem;white-space:nowrap}
+.chg{font-size:.8rem;white-space:nowrap}
+.chg.up{color:var(--olive)}.chg.down{color:var(--warn)}
+.detail td{padding:0 8px 14px;background:var(--aegean-soft)}
+.dcard{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:760px){.dcard{grid-template-columns:1fr}}
+.qlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;font-size:.86rem}
+.qlist li{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;align-items:start}
+.qlist .src{display:inline;margin:0}
+.fb h3{margin-bottom:4px}
+.fb ul{margin:0 0 8px;padding-left:1.1em;font-size:.88rem;display:flex;flex-direction:column;gap:3px}
+.fb .good li::marker{content:"＋ ";color:var(--olive)}
+.fb .next li::marker{content:"→ ";color:var(--ochre)}
+.scroll{overflow-x:auto}
+.empty{border:1px dashed var(--line);border-radius:10px;padding:22px;text-align:center;color:var(--muted);font-size:.9rem}
+.msg{font-size:.86rem;color:var(--olive);min-height:1.3em}
+.msg.err{color:var(--warn)}
+#topMsg:empty{display:none}
+.tip{position:fixed;pointer-events:none;background:var(--ink);color:var(--panel);font-size:.78rem;padding:5px 9px;border-radius:6px;z-index:9;max-width:260px;display:none}
+code{font-family:ui-monospace,Consolas,monospace;font-size:.8rem;background:var(--bg);padding:1px 5px;border-radius:4px}
+.ex{font-family:ui-monospace,Consolas,monospace;font-size:.78rem;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;white-space:pre-wrap;word-break:break-all}
+.items{columns:2;column-gap:20px;font-size:.8rem;color:var(--muted);margin:0;padding-left:1.4em}
+@media (max-width:640px){.items{columns:1}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <span class="eyebrow">교사용 · 소크라테스식 질문 7차시 기록 모음</span>
+      <h1>질문 성장 리포트</h1>
+      <div class="src" id="srcBadges"></div>
+    </div>
+    <div class="row">
+      <button class="btn" id="copyAllBtn">피드백 전체 복사</button>
+      <button class="btn primary" id="csvBtn">CSV 내려받기</button>
+    </div>
+  </header>
+  <p class="msg" id="topMsg" aria-live="polite"></p>
+
+  <nav role="tablist">
+    <button class="tab" data-tab="sum" aria-selected="true">학급 요약</button>
+    <button class="tab" data-tab="stu" aria-selected="false">학생별 피드백</button>
+    <button class="tab" data-tab="in" aria-selected="false">자료 넣기</button>
+    <button class="tab" data-tab="chk" aria-selected="false">점검지</button>
+  </nav>
+
+  <!-- 학급 요약 -->
+  <section id="tab-sum" style="display:flex;flex-direction:column;gap:16px">
+    <div class="kpis" id="kpis"></div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="head"><h2>학생별 도달 층</h2><span class="note">한 학생이 만든 가장 높은 층</span></div>
+        <div class="seg" id="segFloor"></div>
+        <div class="legend"><span><i style="background:var(--s1)"></i>1층 사실 확인</span><span><i style="background:var(--s2)"></i>2층 연결·설명</span><span><i style="background:var(--s3)"></i>3층 전이·주장</span></div>
+        <div class="head" style="margin-top:6px"><h3>질문 유형 분포</h3><span class="note" id="typeTotal"></span></div>
+        <div class="bars" id="typeBars"></div>
+      </div>
+      <div class="panel">
+        <div class="head"><h2>수업 처방</h2><span class="note">기록에서 자동으로 찾은 다음 수업 힌트</span></div>
+        <div class="rx"><ul id="rx"></ul></div>
+        <div class="head" style="margin-top:4px"><h3>차시별 기록 현황</h3><span class="note">이 기기 + 붙여 넣은 자료</span></div>
+        <div class="status" id="status"></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <div class="head"><h2>확신도 전·후</h2><span class="note">반대 −5 ··· 0 ··· +5 찬성</span></div>
+        <div class="legend"><span><i style="background:var(--pre);border-radius:50%"></i>수업 전</span><span><i style="background:var(--aegean);border-radius:50%"></i>수업 후</span></div>
+        <div class="chartbox" id="confChart"></div>
+        <p class="note" id="confNote"></p>
+      </div>
+      <div class="panel">
+        <div class="head"><h2>질문 힘 점검 · 6영역 전·후</h2><span class="note">학급 평균 (1~4점)</span></div>
+        <div class="legend"><span><i style="background:var(--pre);border-radius:50%"></i>사전</span><span><i style="background:var(--aegean);border-radius:50%"></i>사후</span></div>
+        <div class="chartbox" id="chkChart"></div>
+        <p class="note" id="chkNote"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 학생별 -->
+  <section id="tab-stu" class="panel" hidden>
+    <div class="head">
+      <div class="filters" id="filters"></div>
+      <div class="row"><label class="note" for="sortSel">정렬</label>
+        <select id="sortSel"><option value="name">이름순</option><option value="floor">층 높은 순</option><option value="qs">질문 많은 순</option><option value="need">도움 필요 순</option></select></div>
+    </div>
+    <div class="scroll"><table class="stable" id="stable"></table></div>
+    <p class="note">행을 누르면 질문 기록, 자동 피드백, 학생부 기록 초안이 열립니다. 피드백과 초안은 규칙으로 만든 출발점이에요. 최종 문장은 선생님이 고쳐 확정해 주세요.</p>
+  </section>
+
+  <!-- 자료 넣기 -->
+  <section id="tab-in" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div class="grid2">
+      <div class="panel">
+        <h2>학생 기록 붙여 넣기</h2>
+        <p class="note">학급 게시판(클래스룸 댓글 등)에 모인 학생 기록을 그대로 복사해 붙여 넣으세요. 아래 세 가지를 자동으로 알아봅니다. 같은 기록은 한 번만 들어가요.</p>
+        <textarea id="paste" rows="10" placeholder="⟦질문⟧ 건우 | cons | 만약 모두가 착한 거짓말을 하면 서로 믿을 수 있을까? | clar>evid>cons | coach"></textarea>
+        <div class="row"><button class="btn primary" id="importBtn">기록 넣기</button><span class="msg" id="inMsg"></span></div>
+      </div>
+      <div class="panel">
+        <h2>알아보는 형식</h2>
+        <div class="ex">⟦질문⟧ 이름 | 유형 | 질문 | 사다리 | 앱
+   ← 질문 분류 카드(2)·사다리 코치(3)·아테네 시민(5)
+성찰: 시민이 '언제나'를 쓴 걸 물었을 때 …
+   ← 아테네 시민 성찰 (바로 위 학생에게 붙음)
+이름: 건우
+초점: 거짓말은 나쁘다 …
+1. 착한 거짓말은 누가 정할까?
+   ← 질문 폭풍(1) 목록</div>
+        <p class="note">투표판(4)·서클 보드(6)·워크시트(7)는 이 기기에서 쓴 기록을 자동으로 읽습니다. 학생 이름은 서클 보드의 명단과 같게 써야 한 사람으로 합쳐집니다.</p>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="head"><h2>들어와 있는 자료</h2><div class="row"><button class="btn sm danger" id="clearBtn">붙여 넣은 기록 지우기</button></div></div>
+      <div class="status" id="srcList"></div>
+      <p class="note">모든 기록은 이 브라우저에만 저장되고 밖으로 보내지 않습니다. 학기 말에는 CSV로 내려받아 보관한 뒤 지우세요.</p>
+    </div>
+  </section>
+
+  <!-- 점검지 -->
+  <section id="tab-chk" hidden style="display:flex;flex-direction:column;gap:16px">
+    <div class="grid2">
+      <div class="panel">
+        <h2>점검지 점수 입력</h2>
+        <div class="row">
+          <label><input type="radio" name="phase" value="pre" checked> 사전 (1차시)</label>
+          <label><input type="radio" name="phase" value="post"> 사후 (7차시)</label>
+        </div>
+        <p class="note">한 줄에 한 학생. 이름 뒤에 12문항 점수(1~4)를 띄어 쓰거나 붙여 쓰세요. 예: <code>건우 3 3 2 4 3 2 3 3 2 3 4 3</code> 또는 <code>건우 332432332343</code></p>
+        <textarea id="chkPaste" rows="8"></textarea>
+        <div class="row"><button class="btn primary" id="chkBtn">점수 넣기</button><span class="msg" id="chkMsg"></span></div>
+      </div>
+      <div class="panel">
+        <h2>문항 (나의 질문 힘 점검지)</h2>
+        <ol class="items">
+          <li>질문이 공부에 도움이 된다 · 인식</li><li>좋은 질문이 있다는 걸 안다 · 인식</li>
+          <li>궁금한 점을 여러 개 떠올린다 · 생성</li><li>생각을 질문 문장으로 바꾼다 · 생성</li>
+          <li>닫힌·열린 질문을 구별한다 · 유형화</li><li>뜻·이유·결과 질문을 구별한다 · 유형화</li>
+          <li>친구 말을 이어 질문한다 · 활용</li><li>AI·인터넷 내용을 질문으로 확인한다 · 활용</li>
+          <li>내 질문을 더 좋게 고쳐 쓴다 · 성찰</li><li>믿고 싶은 정보만 고르지 않는지 돌아본다 · 성찰</li>
+          <li>모르면 부끄러워하지 않고 묻는다 · 성향</li><li>자신 있는 말도 한 번 더 생각한다 · 성향</li>
+        </ol>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="head"><h2>입력된 점수</h2><span class="note">영역별 평균 (사전 → 사후)</span></div>
+      <div class="scroll"><table class="stable" id="chkTable"></table></div>
+    </div>
+  </section>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+const TYPES=[
+ {k:"clar",e:"🔍",n:"명료화",lv:1},{k:"evid",e:"📎",n:"이유·증거",lv:2},{k:"assm",e:"🧱",n:"가정",lv:2},
+ {k:"view",e:"👓",n:"관점",lv:3},{k:"cons",e:"🌊",n:"결과",lv:3},{k:"meta",e:"❓",n:"질문의 질문",lv:3}];
+const T=Object.fromEntries(TYPES.map(t=>[t.k,t]));
+const FLOOR={1:"사실 확인",2:"연결·설명",3:"전이·주장"};
+const SRC={storm:"질문 폭풍",sort:"분류 카드",coach:"사다리 코치",vote:"투표판",athens:"아테네 시민",circle:"서클 보드",ws:"워크시트",paste:"붙여 넣기"};
+const DOMAINS=["인식","생성","유형화","활용","성찰","성향"];
+const KEY="question-report-v1";
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const clean=s=>String(s??"").trim();
+function ls(k){try{return JSON.parse(localStorage.getItem(k)||"null")}catch(e){return null}}
+let R=ls(KEY)||{pasted:[],storms:{},checks:{pre:{},post:{}},notes:{}};
+function save(){try{localStorage.setItem(KEY,JSON.stringify(R))}catch(e){}}
+
+/* ---------- 자료 모으기 ---------- */
+function collect(){
+  const S={};const seen=new Set();const src={storm:0,sort:0,coach:0,vote:0,athens:0,circle:0,ws:0,paste:0};
+  const stu=n=>{n=clean(n);if(!n||n==="이름없음")return null;return S[n]||(S[n]={name:n,qs:[],storm:0,circle:0,circleTypes:new Set(),conf:{},check:{},reflect:[],votes:0,ws:null,trails:[]})};
+  const addQ=(n,type,q,from,trail)=>{const s=stu(n);if(!s||!T[type])return;const key=n+"|"+q;if(seen.has(key))return;seen.add(key);
+    s.qs.push({type,q:clean(q),from});if(trail&&trail.length>1)s.trails.push(trail.filter(k=>T[k]))};
+  // 1 질문 폭풍 (이 기기)
+  const st=ls("question-storm-v1");if(st&&!st.example&&st.name&&st.qs&&st.qs.length){const s=stu(st.name);if(s){s.storm=Math.max(s.storm,st.qs.length);src.storm++}}
+  // 2 분류 카드
+  const so=ls("question-sort-v1");if(so&&!so.example&&so.name&&so.mine){let c=0;so.mine.filter(q=>q.k).forEach(q=>{addQ(so.name,q.k,q.t,"sort");c++});if(c)src.sort++}
+  // 3 코치
+  const co=ls("question-coach-v1");if(co&&!co.example&&co.name&&co.steps&&co.steps.length){co.steps.forEach((x,i)=>addQ(co.name,x.type,x.q,"coach",i===co.steps.length-1?co.steps.map(y=>y.type):null));src.coach++}
+  // 5 아테네 시민
+  const at=ls("athens-citizen-v1");if(at&&!at.example&&at.name&&at.turns&&at.turns.length){at.turns.forEach(x=>addQ(at.name,x.type,x.q,"athens"));src.athens++}
+  // 7 워크시트
+  const ws=ls("qmake-draft-v1");if(ws&&ws.name&&ws.prompt){const s=stu(ws.name);if(s){s.ws={prompt:ws.prompt,rung:ws._rung,parts:["source","prompt","e1"].filter(k=>clean(ws[k])).length+((ws.c_len||ws.c_src||ws.c_word||ws.c_etc)?1:0)};src.ws++}}
+  // 6 서클 보드
+  const ci=ls("socratic-circle-v1");
+  if(ci&&!ci.sample&&ci.students){
+    const nm=Object.fromEntries(ci.students.map(s=>[s.id,s.name]));
+    ci.students.forEach(s=>stu(s.name));
+    (ci.log||[]).forEach(l=>{const s=stu(nm[l.sid]);if(!s)return;s.circle++;s.circleTypes.add(l.type);src.circle++});
+    ["pre","post"].forEach(ph=>Object.entries((ci.votes||{})[ph]||{}).forEach(([id,v])=>{const s=stu(nm[id]);if(s)s.conf[ph]=v}));
+    (ci.inbox||[]).forEach(q=>addQ(q.name,q.type,q.q,"circle",q.trail));
+  }
+  // 4 투표판
+  const vo=ls("question-vote-v1");
+  if(vo&&!vo.example&&vo.cards){vo.cards.forEach(c=>(c.from||[]).forEach(f=>{const s=S[clean(f)];if(s){s.votes++;src.vote++}}))}
+  // 붙여 넣은 기록
+  R.pasted.forEach(p=>{if(p.kind==="q"){addQ(p.name,p.type,p.q,p.app||"paste",p.trail);src.paste++}
+    else if(p.kind==="r"){const s=stu(p.name);if(s&&!s.reflect.includes(p.text))s.reflect.push(p.text)}});
+  Object.entries(R.storms).forEach(([n,c])=>{const s=stu(n);if(s){s.storm=Math.max(s.storm,c);src.storm++}});
+  // 점검지
+  ["pre","post"].forEach(ph=>Object.entries(R.checks[ph]).forEach(([n,a])=>{const s=stu(n);if(s)s.check[ph]=a}));
+  return {S,src};
+}
+
+/* ---------- 예시 자료 (자료가 하나도 없을 때만) ---------- */
+function demo(){
+  const names=["하늘","도윤","서아","지호","예린","민준","소율","건우","나연","시우","유나","태오"];
+  const Q={clar:["착한 거짓말이란 정확히 뭐야?","예를 들면 어떤 때가 착한 거짓말이야?"],evid:["왜 착한 거짓말이 괜찮다고 생각해?","상대가 기뻐했다는 걸 어떻게 알 수 있어?"],
+    assm:["거짓말이 들키지 않는다고 당연하게 생각한 거 아니야?","착한 거짓말은 언제나 상대를 위한 걸까?"],view:["거짓말을 들은 사람이 나중에 알면 기분이 어떨까?","어른들은 착한 거짓말을 다르게 볼까?"],
+    cons:["모두가 착한 거짓말을 하면 서로 믿을 수 있을까?","착한 거짓말을 계속하면 우정은 어떻게 될까?"],meta:["이 질문에 답하려면 무엇부터 알아야 할까?","'착한'이라는 말이 이 질문을 어렵게 만드는 걸까?"]};
+  const plan=[["clar","evid","cons","view"],["clar","evid"],["clar","assm","view","meta","cons"],["clar"],["evid","cons"],["clar","evid","assm"],["clar","view"],["clar","evid","cons","meta"],["clar","view","cons"],["evid","assm"],["clar"],["clar","evid","view"]];
+  const S={};
+  names.forEach((n,i)=>{const p=plan[i];
+    S[n]={name:n,storm:[9,6,12,3,7,5,8,10,6,4,2,7][i],qs:p.map((k,j)=>({type:k,q:Q[k][(i+j)%2],from:j===p.length-1&&i%3===0?"athens":"coach"})),
+      trails:p.length>1?[p.slice()]:[],circle:[3,1,4,0,2,2,1,3,2,1,0,2][i],circleTypes:new Set(p.slice(0,[3,1,4,0,2,2,1,3,2,1,0,2][i])),
+      conf:{pre:[4,3,5,-2,2,4,-3,5,1,3,-4,2][i],post:[2,1,3,-1,-1,2,-2,3,1,2,-4,1][i]},
+      check:{pre:Array.from({length:12},(_,k)=>1+((i*7+k*3)%3)),post:Array.from({length:12},(_,k)=>Math.min(4,2+((i*5+k*2)%3)))},
+      reflect:i%4===0?["'모두가 그렇게 하면?'이라고 물었을 때 시민의 확신이 가장 크게 떨어졌다."]:[],votes:i%3===0?1:0,ws:i%2===0?{prompt:Q.cons[0],rung:2,parts:3+(i%2)}:null};
+  });
+  return {S,src:{storm:12,sort:0,coach:12,vote:4,athens:4,circle:21,ws:6,paste:0},demo:true};
+}
+
+/* ---------- 학생 지표·피드백 ---------- */
+function metrics(s){
+  const types=new Set([...s.qs.map(q=>q.type),...s.circleTypes,...s.trails.flat()]);
+  const floors=[...types].map(k=>T[k].lv);const maxF=floors.length?Math.max(...floors):0;
+  const growth=s.trails.reduce((b,t)=>{if(!t.length)return b;const a=T[t[0]].lv,z=Math.max(...t.map(k=>T[k].lv));return z-a>b.d?{d:z-a,from:a,to:z}:b},{d:0});
+  const avg=a=>a&&a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+  const dom=a=>a?DOMAINS.map((_,i)=>(a[i*2]+a[i*2+1])/2):null;
+  const cPre=avg(s.check.pre),cPost=avg(s.check.post);
+  let confTag=null;const p=s.conf.pre,q=s.conf.post;
+  if(p!=null&&q!=null)confTag=Math.sign(p)!==Math.sign(q)?"전환":Math.abs(q)<Math.abs(p)?"흔들림":Math.abs(q)>Math.abs(p)?"강해짐":"유지";
+  const best=[...s.qs].sort((a,b)=>T[b.type].lv-T[a.type].lv)[0];
+  return {types,maxF,growth,cPre,cPost,dPre:dom(s.check.pre),dPost:dom(s.check.post),confTag,best,nq:s.qs.length+s.circle};
+}
+function feedback(s,m){
+  const good=[],next=[];
+  if(m.maxF===3)good.push(`다른 사람의 입장이나 결과까지 묻는 3층 질문을 만들었어요${m.best?` ("${m.best.q}")`:""}.`);
+  else if(m.maxF===2)good.push("이유와 근거를 묻는 2층 질문을 만들었어요.");
+  else if(m.maxF===1)good.push("말의 뜻을 분명히 하는 질문으로 탐구를 시작했어요.");
+  if(m.growth.d>=1)good.push(`질문을 ${m.growth.from}층에서 ${m.growth.to}층까지 고쳐 쓰며 깊게 만들었어요.`);
+  if(m.types.size>=4)good.push(`${m.types.size}가지 종류의 질문을 고루 썼어요.`);
+  if(s.circle>=3)good.push(`서클 토론에서 질문 ${s.circle}개로 대화를 이끌었어요.`);
+  if(s.storm>=8)good.push(`질문 폭풍에서 질문을 ${s.storm}개나 쏟아냈어요.`);
+  if(m.confTag==="흔들림"||m.confTag==="전환")good.push("친구들의 질문을 듣고 자기 생각의 확신을 다시 조정했어요.");
+  if(m.cPre!=null&&m.cPost!=null&&m.cPost-m.cPre>=.5)good.push("질문 힘 점검 점수가 뚜렷하게 올랐어요.");
+  const miss=TYPES.filter(t=>!m.types.has(t.k));
+  if(m.maxF<3)next.push("3층에 도전해 보세요: \"반대편 사람이라면?\" \"모두가 그렇게 하면 어떻게 될까?\"");
+  if(m.maxF>=1&&m.maxF<2)next.push("\"왜 그렇게 생각해?\" \"어떻게 알 수 있어?\"로 근거를 물어보세요.");
+  if(!m.types.has("evid")&&m.maxF>=2)next.push("근거를 묻는 📎 질문도 써 보세요. 확신을 검증하는 기본기예요.");
+  if(m.types.size>0&&m.types.size<3&&miss.length)next.push(`아직 안 써 본 카드: ${miss.slice(0,3).map(t=>t.e+" "+t.n).join(", ")}`);
+  if(s.circle===0)next.push("다음 서클에서 \"○○ 말대로라면…\"으로 친구 말을 이어 한 번 질문해 보세요.");
+  if(!m.nq)next.push("아직 기록된 질문이 없어요. 질문 폭풍부터 함께 시작해 보세요.");
+  if(m.confTag==="강해짐")next.push("확신이 더 강해졌어요. 반대 입장의 가장 좋은 질문은 무엇이었는지 적어 보세요.");
+  return {good,next};
+}
+function record(s,m){
+  if(!m.nq)return "";
+  const parts=[];
+  if(m.best)parts.push(`소크라테스식 질문 수업에서 '${m.best.q}'와 같이 ${FLOOR[T[m.best.type].lv]} 수준의 질문을 스스로 만듦`);
+  if(m.growth.d>=1)parts.push(`질문 사다리 활동에서 처음 질문을 ${m.growth.from}층에서 ${m.growth.to}층으로 고쳐 쓰며 질문을 깊게 하는 방법을 익힘`);
+  if(s.circle>=2)parts.push(`소크라테스 서클 토론에서 ${[...s.circleTypes].map(k=>T[k].n).slice(0,3).join("·")} 질문으로 대화에 참여함`);
+  if(m.confTag==="흔들림"||m.confTag==="전환")parts.push("친구들의 질문을 통해 자신의 확신을 성찰하고 생각을 조정함");
+  if(s.ws&&s.ws.parts>=3)parts.push("탐구 질문을 자료·조건을 갖춘 서·논술형 문항으로 발전시킴");
+  return parts.join(". ")+".";
+}
+
+/* ---------- 그리기 ---------- */
+let DATA,STU,filter="all",openName=null;
+function build(){
+  const c=collect();const real=Object.values(c.S).some(s=>s.qs.length||s.circle||s.storm||Object.keys(s.check).length);
+  DATA=real?c:demo();
+  STU=Object.values(DATA.S).map(s=>({s,m:metrics(s)}));
+  STU.forEach(x=>{x.f=feedback(x.s,x.m);x.rec=R.notes[x.s.name]??record(x.s,x.m)});
+}
+function render(){
+  build();
+  $("srcBadges").innerHTML=(DATA.demo?'<span class="badge demo">예시 자료로 보는 중 · 기록을 넣으면 사라져요</span>':"")+
+    Object.entries(SRC).map(([k,n])=>`<span class="badge ${DATA.src[k]?"on":""}">${n}${DATA.src[k]?" ✓":""}</span>`).join("");
+  drawKpis();drawFloor();drawTypes();drawRx();drawStatus();drawConf();drawChk();drawStudents();drawSrcList();drawChkTable();
+}
+function drawKpis(){
+  const n=STU.length,withQ=STU.filter(x=>x.m.maxF);
+  const totalQ=STU.reduce((a,x)=>a+x.s.qs.length+x.s.circle,0);
+  const f3=STU.filter(x=>x.m.maxF===3).length;
+  const div=withQ.length?withQ.reduce((a,x)=>a+x.m.types.size,0)/withQ.length:0;
+  const storm=STU.filter(x=>x.s.storm);const stormAvg=storm.length?storm.reduce((a,x)=>a+x.s.storm,0)/storm.length:null;
+  const both=STU.filter(x=>x.m.cPre!=null&&x.m.cPost!=null);
+  const dC=both.length?both.reduce((a,x)=>a+x.m.cPost-x.m.cPre,0)/both.length:null;
+  const kp=[
+    [n,"명","참여 학생"],[totalQ,"개","기록된 질문"],[n?Math.round(f3/n*100):0,"%",`3층 도달 (${f3}명)`],
+    [div.toFixed(1),"/6","평균 질문 유형 수"],[stormAvg==null?"–":stormAvg.toFixed(1),"개","1차시 평균 질문 수"],
+    [dC==null?"–":(dC>=0?"+":"")+dC.toFixed(2),"점","점검지 변화 (4점 척도)"]];
+  $("kpis").innerHTML=kp.map(([v,u,l],i)=>`<div class="kpi"><b>${v}<small> ${u}</small></b><span>${l}</span></div>`).join("");
+}
+function drawFloor(){
+  const c=[0,0,0,0];STU.forEach(x=>c[x.m.maxF]++);const n=STU.length||1;
+  $("segFloor").innerHTML=[1,2,3].map(f=>c[f]?`<div class="${f>1?"dark":""}" style="flex:${c[f]};background:var(--s${f})" data-tip="${f}층 ${FLOOR[f]}: ${c[f]}명 (${Math.round(c[f]/n*100)}%)">${c[f]}명</div>`:"").join("")+
+    (c[0]?`<div style="flex:${c[0]};background:var(--grid);color:var(--muted)" data-tip="기록 없음: ${c[0]}명">${c[0]}</div>`:"");
+}
+function drawTypes(){
+  const cnt=Object.fromEntries(TYPES.map(t=>[t.k,0]));
+  STU.forEach(x=>{x.s.qs.forEach(q=>cnt[q.type]++)});
+  // 서클 기록은 유형별 횟수로 더함
+  const ci=ls("socratic-circle-v1");if(!DATA.demo&&ci&&!ci.sample)(ci.log||[]).forEach(l=>cnt[l.type]!=null&&cnt[l.type]++);
+  if(DATA.demo)STU.forEach(x=>[...x.s.circleTypes].forEach(k=>cnt[k]++));
+  const tot=Object.values(cnt).reduce((a,b)=>a+b,0),max=Math.max(1,...Object.values(cnt));
+  $("typeTotal").textContent=`질문 ${tot}개`;
+  $("typeBars").innerHTML=TYPES.map(t=>`<div class="bar" data-tip="${t.e} ${t.n} · ${t.lv}층 · ${cnt[t.k]}개 (${tot?Math.round(cnt[t.k]/tot*100):0}%)"><span class="lab">${t.e} ${t.n}</span><div class="track"><div class="fill" style="width:${cnt[t.k]/max*100}%;background:var(--s${t.lv})"></div></div><span class="v">${cnt[t.k]}</span></div>`).join("");
+  DATA.typeCnt=cnt;DATA.typeTot=tot;
+}
+function drawRx(){
+  const L=[];const n=STU.length;const cnt=DATA.typeCnt,tot=DATA.typeTot||1;
+  const f1=(cnt.clar)/tot;
+  if(f1>=.4)L.push(`질문의 ${Math.round(f1*100)}%가 1층 명료화예요. 다음 시간 시작에 "그 말을 한 층 올리면?"으로 사다리 시범을 다시 보여 주세요.`);
+  const low=TYPES.filter(t=>t.k!=="clar").sort((a,b)=>cnt[a.k]-cnt[b.k])[0];
+  if(low)L.push(`가장 적게 나온 질문은 ${low.e} ${low.n}(${cnt[low.k]}개)이에요. 서클 2라운드에서 이 카드를 '오늘의 카드'로 정해 보세요.`);
+  const no3=STU.filter(x=>x.m.maxF&&x.m.maxF<3);
+  if(no3.length)L.push(`3층에 아직 오르지 못한 학생 ${no3.length}명: ${no3.slice(0,6).map(x=>x.s.name).join(", ")}${no3.length>6?" 외":""}. 코치에서 힌트를 켠 채로 한 번 더 고쳐 쓰게 해 보세요.`);
+  const silent=STU.filter(x=>x.s.circle===0&&(DATA.src.circle||DATA.demo));
+  if(silent.length)L.push(`서클에서 질문 기록이 없는 학생 ${silent.length}명: ${silent.map(x=>x.s.name).join(", ")}. 다음 서클에서는 안쪽 원에 먼저 앉혀 주세요.`);
+  const strong=STU.filter(x=>x.m.confTag==="강해짐");
+  if(strong.length)L.push(`확신이 오히려 강해진 학생 ${strong.length}명이 있어요. 반대 입장의 질문을 하나 골라 출구 카드에 답하게 해 보세요.`);
+  const chk=STU.filter(x=>x.m.dPost);
+  if(chk.length){const avg=DOMAINS.map((_,i)=>chk.reduce((a,x)=>a+x.m.dPost[i],0)/chk.length);const wi=avg.indexOf(Math.min(...avg));
+    L.push(`사후 점검에서 가장 낮은 영역은 '${DOMAINS[wi]}'(${avg[wi].toFixed(1)}점)이에요.`)}
+  if(!L.length)L.push("기록이 더 쌓이면 다음 수업 힌트를 보여 드릴게요.");
+  $("rx").innerHTML=L.map(t=>`<li>${esc(t)}</li>`).join("");
+}
+function drawStatus(){
+  const rows=[[1,"질문 폭풍","storm","명"],[2,"질문 분류 카드","sort","명"],[3,"질문 사다리 코치","coach","명"],[4,"질문 투표판","vote","개 질문 출처"],[5,"아테네 시민 챌린지","athens","명"],[6,"소크라테스 서클 보드","circle","개 질문"],[7,"질문 만들기 워크시트","ws","명"]];
+  $("status").innerHTML=rows.map(([n,t,k,u])=>`<div class="st"><span class="n">${n}</span><span>${t}</span><span class="pill ${DATA.src[k]?"ok":""}">${DATA.src[k]?`${DATA.src[k]}${u}`:"기록 없음"}</span></div>`).join("");
+}
+function dumbbell(rows,min,max,ticks){
+  // rows: [{label,a,b,tip}]
+  const W=520,lw=78,rw=14,rh=24,top=20,H=top+rows.length*rh+8;
+  const x=v=>lw+(v-min)/(max-min)*(W-lw-rw);
+  let g=`<svg viewBox="0 0 ${W} ${H}" width="100%" style="min-width:360px" role="img">`;
+  ticks.forEach(t=>{g+=`<line x1="${x(t)}" x2="${x(t)}" y1="${top-4}" y2="${H-6}" stroke="var(--grid)" stroke-width="${t===0?1.5:1}"/><text x="${x(t)}" y="${top-8}" text-anchor="middle" font-size="10" fill="var(--muted)">${t>0&&min<0?"+"+t:t}</text>`});
+  rows.forEach((r,i)=>{const y=top+i*rh+rh/2;
+    g+=`<text x="${lw-8}" y="${y+4}" text-anchor="end" font-size="11" fill="var(--ink)">${esc(r.label)}</text>`;
+    if(r.a!=null&&r.b!=null)g+=`<line x1="${x(r.a)}" x2="${x(r.b)}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="2"/>`;
+    if(r.a!=null)g+=`<circle cx="${x(r.a)}" cy="${y}" r="5" fill="var(--pre)" stroke="var(--panel)" stroke-width="2"/>`;
+    if(r.b!=null)g+=`<circle cx="${x(r.b)}" cy="${y}" r="5.5" fill="var(--aegean)" stroke="var(--panel)" stroke-width="2"/>`;
+    g+=`<rect x="0" y="${y-rh/2}" width="${W}" height="${rh}" fill="transparent" data-tip="${esc(r.tip)}"/>`;
+  });
+  return g+"</svg>";
+}
+function drawConf(){
+  const rows=STU.filter(x=>x.s.conf.pre!=null||x.s.conf.post!=null).map(x=>({label:x.s.name,a:x.s.conf.pre,b:x.s.conf.post,
+    tip:`${x.s.name}: 전 ${fmtC(x.s.conf.pre)} → 후 ${fmtC(x.s.conf.post)}${x.m.confTag?` · ${x.m.confTag}`:""}`}));
+  if(!rows.length){$("confChart").innerHTML='<div class="empty">서클 보드 확신도 탭에 전·후 값을 넣으면 여기에 나타나요.</div>';$("confNote").textContent="";return}
+  $("confChart").innerHTML=dumbbell(rows,-5,5,[-5,-3,0,3,5]);
+  const tag=k=>STU.filter(x=>x.m.confTag===k).length;
+  $("confNote").textContent=`입장 전환 ${tag("전환")}명 · 확신 흔들림 ${tag("흔들림")}명 · 강해짐 ${tag("강해짐")}명 · 유지 ${tag("유지")}명. 확신이 낮아진 것도 배움이에요.`;
+}
+const fmtC=v=>v==null?"–":(v>0?"찬성 +"+v:"반대 "+v);
+function drawChk(){
+  const pre=STU.filter(x=>x.m.dPre),post=STU.filter(x=>x.m.dPost);
+  if(!pre.length&&!post.length){$("chkChart").innerHTML='<div class="empty">점검지 탭에 사전·사후 점수를 넣으면 여기에 나타나요.</div>';$("chkNote").textContent="";return}
+  const avg=(arr,k,i)=>arr.length?arr.reduce((a,x)=>a+x.m[k][i],0)/arr.length:null;
+  const rows=DOMAINS.map((d,i)=>{const a=avg(pre,"dPre",i),b=avg(post,"dPost",i);
+    return {label:d,a,b,tip:`${d}: 사전 ${a==null?"–":a.toFixed(2)} → 사후 ${b==null?"–":b.toFixed(2)}${a!=null&&b!=null?` (${b-a>=0?"+":""}${(b-a).toFixed(2)})`:""}`}});
+  $("chkChart").innerHTML=dumbbell(rows,1,4,[1,2,3,4]);
+  const gains=rows.filter(r=>r.a!=null&&r.b!=null).map(r=>({d:r.label,g:r.b-r.a})).sort((p,q)=>q.g-p.g);
+  $("chkNote").textContent=gains.length?`가장 많이 오른 영역: ${gains[0].d} (${gains[0].g>=0?"+":""}${gains[0].g.toFixed(2)}) · 사전 ${pre.length}명, 사후 ${post.length}명 응답`:`사전 ${pre.length}명, 사후 ${post.length}명 응답`;
+}
+function glyphs(set){return `<span class="glyphs">${TYPES.map(t=>`<span class="${set.has(t.k)?"":"off"}" title="${t.n}">${t.e}</span>`).join("")}</span>`}
+const FILTERS=[["all","전체"],["no3","3층 미도달"],["silent","서클 기록 없음"],["drop","점검지 하락"],["none","질문 기록 없음"]];
+function drawStudents(){
+  $("filters").innerHTML=FILTERS.map(([k,l])=>{const c=pick(k).length;return `<button class="chipbtn" data-f="${k}" aria-pressed="${filter===k}">${l} ${c}</button>`}).join("");
+  $("filters").querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{filter=b.dataset.f;drawStudents()});
+  let list=pick(filter);const sk=$("sortSel").value;
+  const need=x=>(3-x.m.maxF)*2+(x.s.circle?0:2)+(x.m.types.size<3?1:0);
+  list.sort((a,b)=>sk==="floor"?b.m.maxF-a.m.maxF||b.m.types.size-a.m.types.size:sk==="qs"?b.m.nq-a.m.nq:sk==="need"?need(b)-need(a):a.s.name.localeCompare(b.s.name,"ko"));
+  if(!list.length){$("stable").innerHTML='<tr><td><div class="empty">이 조건에 맞는 학생이 없어요.</div></td></tr>';return}
+  $("stable").innerHTML=`<thead><tr><th>이름</th><th>최고 층</th><th>쓴 질문 유형</th><th>질문</th><th>사다리</th><th>서클</th><th>확신도</th><th>점검지</th></tr></thead><tbody>`+
+    list.map(x=>{const s=x.s,m=x.m,o=openName===s.name;
+      const tr=s.trails[0]||[];const chg=m.cPre!=null&&m.cPost!=null?m.cPost-m.cPre:null;
+      return `<tr class="srow ${o?"open":""}" data-n="${esc(s.name)}" tabindex="0" aria-expanded="${o}"><td><b>${esc(s.name)}</b></td>
+      <td>${m.maxF?`<span class="fl fl${m.maxF}">${m.maxF}층 ${FLOOR[m.maxF]}</span>`:'<span class="fl flnone">기록 없음</span>'}</td>
+      <td>${glyphs(m.types)}</td><td>${m.nq}</td>
+      <td class="trail">${tr.length?tr.map(k=>T[k].e).join("→"):"–"}</td>
+      <td>${s.circle||"–"}</td>
+      <td class="chg">${s.conf.pre!=null||s.conf.post!=null?`${s.conf.pre??"–"} → ${s.conf.post??"–"}${m.confTag?` <span class="note">${m.confTag}</span>`:""}`:"–"}</td>
+      <td class="chg ${chg==null?"":chg>=0?"up":"down"}">${chg==null?(m.cPre!=null?m.cPre.toFixed(1)+" (사전)":"–"):`${m.cPre.toFixed(1)} → ${m.cPost.toFixed(1)}`}</td></tr>`+
+      (o?`<tr class="detail"><td colspan="8">${detail(x)}</td></tr>`:"")}).join("")+"</tbody>";
+  $("stable").querySelectorAll("tr.srow").forEach(r=>{const f=()=>{openName=openName===r.dataset.n?null:r.dataset.n;drawStudents()};r.onclick=f;r.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();f()}}});
+  $("stable").querySelectorAll("[data-copy]").forEach(b=>b.onclick=e=>{e.stopPropagation();copy(b.dataset.copy==="fb"?fbText(STU.find(x=>x.s.name===openName)):$("recBox").value,b)});
+  const rb=$("recBox");if(rb){rb.onclick=e=>e.stopPropagation();rb.oninput=()=>{R.notes[openName]=rb.value;save()};}
+  const rs=$("recReset");if(rs)rs.onclick=e=>{e.stopPropagation();delete R.notes[openName];save();render()};
+}
+function pick(k){return STU.filter(x=>k==="all"||(k==="no3"&&x.m.maxF&&x.m.maxF<3)||(k==="silent"&&x.s.circle===0&&x.m.nq)||(k==="drop"&&x.m.cPre!=null&&x.m.cPost!=null&&x.m.cPost<x.m.cPre)||(k==="none"&&!x.m.nq))}
+function detail(x){
+  const s=x.s;
+  const qs=s.qs.length?`<ul class="qlist">${s.qs.map(q=>`<li><span class="fl fl${T[q.type].lv}">${T[q.type].e} ${T[q.type].n}</span><span>${esc(q.q)} <span class="note">· ${SRC[q.from]||q.from}</span></span></li>`).join("")}</ul>`:'<p class="note">글로 남은 질문이 없어요.</p>';
+  return `<div class="dcard"><div style="display:flex;flex-direction:column;gap:10px;min-width:0">
+      <h3>질문 기록</h3>${qs}
+      ${s.storm?`<p class="note">질문 폭풍 ${s.storm}개 · 서클 질문 ${s.circle}개${s.votes?` · 투표판에 낸 질문 ${s.votes}개`:""}</p>`:""}
+      ${s.reflect.length?`<div><h3>성찰</h3>${s.reflect.map(r=>`<p style="font-size:.88rem">“${esc(r)}”</p>`).join("")}</div>`:""}
+      ${s.ws?`<div><h3>서·논술형 문항 (7차시)</h3><p style="font-size:.88rem">${esc(s.ws.prompt)}</p><p class="note">워크시트 ${s.ws.parts}/4 요소 작성</p></div>`:""}
+    </div>
+    <div class="fb" style="min-width:0">
+      <h3>잘한 점</h3><ul class="good">${x.f.good.map(t=>`<li>${esc(t)}</li>`).join("")||"<li>기록이 쌓이면 보여요.</li>"}</ul>
+      <h3>다음 걸음</h3><ul class="next">${x.f.next.map(t=>`<li>${esc(t)}</li>`).join("")||"<li>지금처럼 다양한 질문을 이어 가요.</li>"}</ul>
+      <div class="row" style="margin-bottom:10px"><button class="btn sm" data-copy="fb">학생용 피드백 복사</button></div>
+      <h3>학생부 기록 초안 <span class="note">${R.notes[s.name]!=null?"· 선생님이 고침":"· 자동 초안"}</span></h3>
+      <textarea id="recBox" rows="4">${esc(x.rec)}</textarea>
+      <div class="row" style="margin-top:6px"><button class="btn sm" data-copy="rec">초안 복사</button>${R.notes[s.name]!=null?'<button class="btn sm" id="recReset">자동 초안으로 되돌리기</button>':""}</div>
+    </div></div>`;
+}
+function fbText(x){return `[${x.s.name}] 잘한 점: ${x.f.good.join(" ")||"-"} / 다음 걸음: ${x.f.next.join(" ")||"-"}`}
+function copy(t,btn){
+  const done=()=>{const o=btn.textContent;btn.textContent="복사했어요";setTimeout(()=>btn.textContent=o,1400)};
+  const fb=()=>{const ta=document.createElement("textarea");ta.value=t;document.body.appendChild(ta);ta.select();try{document.execCommand("copy");done()}catch(e){flash("복사가 막혀 있어요. 직접 선택해 복사해 주세요.",1)}ta.remove()};
+  try{navigator.clipboard.writeText(t).then(done,fb)}catch(e){fb()}
+}
+function flash(t,err){const m=$("topMsg");m.textContent=t;m.className="msg"+(err?" err":"");clearTimeout(flash.t);flash.t=setTimeout(()=>m.textContent="",3500)}
+
+/* ---------- 자료 넣기 ---------- */
+function parsePaste(text){
+  let added=0,last=null,storm=null;const out={q:0,r:0,s:0};
+  const lines=text.split(/\r?\n/);
+  const flushStorm=()=>{if(storm&&storm.n&&storm.c){R.storms[storm.n]=Math.max(R.storms[storm.n]||0,storm.c);out.s++}storm=null};
+  lines.forEach(L=>{const l=L.trim();if(!l)return;
+    let m=l.match(/⟦질문⟧\s*([^|]+)\|\s*(\w+)\s*\|([^|]+)\|\s*([\w>]+)\s*(?:\|\s*(\w+))?/);
+    if(m){flushStorm();const [,n,type,q,trail,app]=m;if(!T[type.trim()])return;
+      const rec={kind:"q",name:clean(n),type:type.trim(),q:clean(q),trail:trail.split(">").filter(k=>T[k]),app:app||"paste"};
+      if(!R.pasted.some(p=>p.kind==="q"&&p.name===rec.name&&p.q===rec.q)){R.pasted.push(rec);out.q++}
+      last=rec.name;return}
+    m=l.match(/^성찰\s*:\s*(.+)$/);
+    if(m&&last){const rec={kind:"r",name:last,text:clean(m[1])};if(!R.pasted.some(p=>p.kind==="r"&&p.name===last&&p.text===rec.text)){R.pasted.push(rec);out.r++}return}
+    m=l.match(/^이름\s*:\s*(.+)$/);if(m){flushStorm();storm={n:clean(m[1]),c:0};last=null;return}
+    if(storm&&/^초점\s*:/.test(l))return;
+    if(storm&&/^\d+[.)]\s*\S/.test(l)){storm.c++;return}
+  });
+  flushStorm();return out;
+}
+$("importBtn").onclick=()=>{const o=parsePaste($("paste").value);save();
+  const t=o.q+o.r+o.s;$("inMsg").className="msg"+(t?"":" err");
+  $("inMsg").textContent=t?`질문 ${o.q}개, 성찰 ${o.r}개, 질문 폭풍 목록 ${o.s}개를 넣었어요.`:"읽을 수 있는 기록이 없어요. 형식을 확인해 주세요.";
+  if(t)$("paste").value="";render()};
+let clearArmed=false;
+$("clearBtn").onclick=()=>{if(!clearArmed){clearArmed=true;$("clearBtn").textContent="한 번 더 누르면 지워요";setTimeout(()=>{clearArmed=false;$("clearBtn").textContent="붙여 넣은 기록 지우기"},3000);return}
+  R.pasted=[];R.storms={};save();clearArmed=false;$("clearBtn").textContent="붙여 넣은 기록 지우기";flash("붙여 넣은 기록을 지웠어요.");render()};
+function drawSrcList(){
+  const names=[...new Set(R.pasted.map(p=>p.name).concat(Object.keys(R.storms)))];
+  const local=[["question-storm-v1","질문 폭풍"],["question-sort-v1","분류 카드"],["question-coach-v1","사다리 코치"],["question-vote-v1","투표판"],["athens-citizen-v1","아테네 시민"],["socratic-circle-v1","서클 보드"],["qmake-draft-v1","워크시트"]]
+    .map(([k,n])=>{const v=ls(k);return [n,!!v&&!v.example&&!v.sample]});
+  $("srcList").innerHTML=`<div class="st"><span class="n">▤</span><span>붙여 넣은 기록: 질문 ${R.pasted.filter(p=>p.kind==="q").length}개 · 성찰 ${R.pasted.filter(p=>p.kind==="r").length}개 · 폭풍 목록 ${Object.keys(R.storms).length}개 · 학생 ${names.length}명</span><span class="pill ${R.pasted.length?"ok":""}">${R.pasted.length?"있음":"없음"}</span></div>`+
+    `<div class="st"><span class="n">⌂</span><span>이 기기에서 쓴 앱 기록: ${local.filter(x=>x[1]).map(x=>x[0]).join(", ")||"없음"}</span><span class="pill ${local.some(x=>x[1])?"ok":""}">${local.filter(x=>x[1]).length}/7</span></div>`;
+}
+
+/* ---------- 점검지 ---------- */
+$("chkBtn").onclick=()=>{
+  const ph=document.querySelector('input[name="phase"]:checked').value;let ok=0,bad=[];
+  $("chkPaste").value.split(/\r?\n/).forEach(L=>{const l=L.trim();if(!l)return;
+    const m=l.match(/^([^\d\s][^\d]*?)\s*([1-4\s,]+)$/);if(!m){bad.push(l.slice(0,10));return}
+    const nums=m[2].replace(/[\s,]/g,"").split("").map(Number);
+    if(nums.length!==12||nums.some(v=>v<1||v>4)){bad.push(clean(m[1]));return}
+    R.checks[ph][clean(m[1])]=nums;ok++});
+  save();$("chkMsg").className="msg"+(bad.length?" err":"");
+  $("chkMsg").textContent=`${ph==="pre"?"사전":"사후"} ${ok}명을 넣었어요.`+(bad.length?` 12문항이 아니거나 1~4가 아닌 줄: ${bad.slice(0,4).join(", ")}`:"");
+  if(ok)$("chkPaste").value="";render()};
+function drawChkTable(){
+  const names=[...new Set([...Object.keys(R.checks.pre),...Object.keys(R.checks.post)])].sort((a,b)=>a.localeCompare(b,"ko"));
+  if(!names.length){$("chkTable").innerHTML='<tr><td><div class="empty">아직 입력된 점수가 없어요.</div></td></tr>';return}
+  const d=a=>a?DOMAINS.map((_,i)=>(a[i*2]+a[i*2+1])/2):null;
+  $("chkTable").innerHTML=`<thead><tr><th>이름</th>${DOMAINS.map(x=>`<th>${x}</th>`).join("")}<th>전체</th><th></th></tr></thead><tbody>`+
+    names.map(n=>{const a=d(R.checks.pre[n]),b=d(R.checks.post[n]);
+      const cell=i=>{const x=a&&a[i],y=b&&b[i];return x!=null&&y!=null?`<span class="chg ${y>=x?"up":"down"}">${x.toFixed(1)} → ${y.toFixed(1)}</span>`:(x??y)!=null?((x??y).toFixed(1)+(x!=null?" (사전)":" (사후)")):"–"};
+      const av=v=>v?v.reduce((p,q)=>p+q,0)/v.length:null;const A=av(a),B=av(b);
+      return `<tr><td><b>${esc(n)}</b></td>${DOMAINS.map((_,i)=>`<td>${cell(i)}</td>`).join("")}<td>${A!=null&&B!=null?`<b class="chg ${B>=A?"up":"down"}">${A.toFixed(2)} → ${B.toFixed(2)}</b>`:(A??B)?.toFixed(2)??"–"}</td>
+      <td><button class="btn sm danger" data-del="${esc(n)}">지우기</button></td></tr>`}).join("")+"</tbody>";
+  $("chkTable").querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{delete R.checks.pre[b.dataset.del];delete R.checks.post[b.dataset.del];save();render()});
+}
+
+/* ---------- 내보내기 ---------- */
+function csv(){
+  const head=["이름","최고층","질문유형수","기록된질문","질문폭풍","서클질문","확신전","확신후","확신변화","점검사전","점검사후",...DOMAINS.map(d=>"사후_"+d),"잘한점","다음걸음","학생부초안"];
+  const q=v=>`"${String(v??"").replace(/"/g,'""')}"`;
+  return "﻿"+[head.map(q).join(","),...STU.map(({s,m,f,rec})=>[s.name,m.maxF||"",m.types.size,m.nq,s.storm||"",s.circle||"",s.conf.pre??"",s.conf.post??"",m.confTag||"",
+    m.cPre?.toFixed(2)??"",m.cPost?.toFixed(2)??"",...DOMAINS.map((_,i)=>m.dPost?m.dPost[i].toFixed(1):""),f.good.join(" "),f.next.join(" "),rec].map(q).join(","))].join("\r\n");
+}
+$("csvBtn").onclick=()=>{
+  const data=csv();const name=`질문성장리포트_${new Date().toISOString().slice(0,10)}.csv`;
+  try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type:"text/csv;charset=utf-8"}));a.download=name;document.body.appendChild(a);a.click();a.remove();
+    flash(`${name} 내려받기를 시작했어요. 파일이 생기지 않으면 표 내용을 복사해 두었으니 엑셀에 붙여 넣으세요.`);copy(data.replace(/^\ufeff/,"").replace(/","/g,'"\t"'),$("csvBtn"))}catch(e){copy(data,$("csvBtn"))}
+};
+$("copyAllBtn").onclick=()=>copy(STU.map(fbText).join("\n"),$("copyAllBtn"));
+
+/* ---------- 공통 ---------- */
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x===b));
+  ["sum","stu","in","chk"].forEach(k=>$("tab-"+k).hidden=k!==b.dataset.tab);
+});
+$("sortSel").onchange=drawStudents;
+const tip=$("tip");
+document.addEventListener("mousemove",e=>{const t=e.target.closest&&e.target.closest("[data-tip]");
+  if(!t){tip.style.display="none";return}tip.textContent=t.dataset.tip;tip.style.display="block";
+  const x=Math.min(e.clientX+12,innerWidth-tip.offsetWidth-8);tip.style.left=x+"px";tip.style.top=(e.clientY+14)+"px"});
+addEventListener("storage",render);
+render();
+</script>
+</body>
+</html>

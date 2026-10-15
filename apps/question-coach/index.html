@@ -195,7 +195,7 @@ function drawLadder(){
   $("submitBox").hidden=!ready||!S.steps.length;
   if(ready&&S.steps.length){
     const last=S.steps[S.steps.length-1];const clean=x=>String(x).replace(/[|\n]/g,"/").trim();
-    $("out").textContent=`⟦질문⟧ ${clean(S.name||"이름없음")} | ${last.type} | ${clean(last.q)} | ${S.steps.map(s=>s.type).join(">")}`;
+    $("out").textContent=`⟦질문⟧ ${clean(S.name||"이름없음")} | ${last.type} | ${clean(last.q)} | ${S.steps.map(s=>s.type).join(">")} | coach`;
   }
   if(S.example)$("msg").textContent="예시 학생의 사다리예요. 내 이름을 쓰고 '새 질문 시작'을 눌러 주세요.";
 }
