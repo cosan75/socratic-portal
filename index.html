@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>소크라테스 포털</title>
+<meta name="description" content="소크라테스식 질문 7차시 수업의 웹 앱 7종을 한 페이지에서 여는 포털">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: 왼쪽 세로 차시 레일(아고라의 기둥) + 오른쪽 앱 무대(iframe). 첫 화면은 7차시 지도. 좁으면 레일이 위쪽 가로 띠 */
+:root{
+  --bg:#eef0ec;--panel:#f8f9f6;--ink:#1f2a2a;--muted:#5f6b69;--line:#c9cfc9;
+  --aegean:#1f5f8b;--aegean-soft:#d6e5ef;--olive:#6b7a3a;--ochre:#b8862b;
+  --f1:#1f5f8b;--f2:#2f7a55;--f3:#6a4a8c;
+  --display:"Gowun Batang","Nanum Myeongjo",serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--ochre:#d9ac55;
+  --f1:#6fb0dc;--f2:#6cc497;--f3:#b494d8;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--ochre:#d9ac55;
+  --f1:#6fb0dc;--f2:#6cc497;--f3:#b494d8;color-scheme:dark}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;
+  display:grid;grid-template-columns:260px minmax(0,1fr);grid-template-rows:100%}
+h1,h2,h3{font-family:var(--display);margin:0;font-weight:700}
+button,a{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--aegean);outline-offset:2px}
+
+/* 레일 */
+.rail{border-right:1px solid var(--line);background:var(--panel);display:flex;flex-direction:column;min-height:0;min-width:0;
+  padding:max(18px,env(safe-area-inset-top,0px)) 14px 14px max(14px,env(safe-area-inset-left,0px))}
+.brand{display:flex;gap:10px;align-items:center;padding:0 4px 14px;border-bottom:1px solid var(--line);text-decoration:none}
+.brand svg{flex:none}
+.brand h1{font-size:1.25rem;line-height:1.2}
+.brand span{font-size:.72rem;color:var(--muted);display:block;letter-spacing:.04em}
+.nav{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:2px;overflow:auto}
+.nav a{display:grid;grid-template-columns:28px minmax(0,1fr);gap:8px;align-items:center;padding:8px 8px;border-radius:8px;text-decoration:none}
+.nav a:hover{background:var(--bg)}
+.nav a[aria-current="page"]{background:var(--aegean);color:var(--panel)}
+.nav a[aria-current="page"] .n{color:var(--panel);border-color:var(--panel)}
+.nav a[aria-current="page"] small{color:var(--panel);opacity:.85}
+.nav .n{font-family:var(--display);font-size:1rem;width:28px;height:28px;border-radius:50%;border:1.5px solid var(--line);display:grid;place-items:center;color:var(--aegean);font-variant-numeric:tabular-nums}
+.nav b{font-weight:600;font-size:.92rem;display:block;line-height:1.3}
+.nav small{font-size:.72rem;color:var(--muted);display:block;line-height:1.3}
+.nav .home .n{font-size:.9rem}
+.rail .foot{margin-top:auto;padding:12px 4px 0;font-size:.72rem;color:var(--muted);border-top:1px solid var(--line)}
+
+/* 무대 */
+.stage{position:relative;min-width:0;min-height:0;display:flex;flex-direction:column}
+.bar{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:var(--panel);
+  padding:10px max(16px,env(safe-area-inset-right,0px)) 10px 16px}
+.bar .title{display:flex;align-items:baseline;gap:10px;min-width:0}
+.bar .title h2{font-size:1.15rem}
+.bar .title span{font-size:.8rem;color:var(--muted)}
+.bar .acts{display:flex;gap:8px;align-items:center}
+.btn{border:1px solid var(--line);background:var(--bg);padding:6px 12px;border-radius:6px;font-size:.85rem;text-decoration:none;cursor:pointer;white-space:nowrap}
+.btn:hover{border-color:var(--aegean)}
+.who{font-size:.74rem;padding:2px 9px;border-radius:999px;border:1px solid var(--ochre);color:var(--ochre)}
+iframe{flex:1;width:100%;border:0;background:var(--bg);min-height:0}
+
+/* 첫 화면: 7차시 지도 */
+.home{flex:1;overflow:auto;padding:28px max(24px,env(safe-area-inset-right,0px)) 40px 28px}
+.home .inner{max-width:1060px;margin:0 auto;display:flex;flex-direction:column;gap:22px}
+.eyebrow{font-size:.74rem;letter-spacing:.08em;color:var(--muted)}
+.hero h2{font-size:clamp(1.6rem,3.4vw,2.3rem);line-height:1.25;text-wrap:balance;margin:4px 0 8px}
+.hero p{margin:0;max-width:62ch;color:var(--muted)}
+.ladder{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ladder div{border-top:4px solid var(--c);background:var(--panel);border-radius:8px;padding:10px 12px;font-size:.85rem;border-left:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+.ladder b{font-family:var(--display);color:var(--c);display:block;font-size:1rem}
+.phase-h{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
+.phase-h h3{font-size:1.05rem}
+.phase-h span{font-size:.8rem;color:var(--muted)}
+.cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+@media (max-width:1180px){.cards{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:980px){.cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.cards{grid-template-columns:1fr}}
+.card .ph{font-size:.72rem;color:var(--muted);letter-spacing:.04em}
+.card.more{background:transparent;border-style:dashed;justify-content:center}
+.card.more:hover{transform:none;border-color:var(--line)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow:hidden;display:flex;flex-direction:column;text-decoration:none;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--aegean);transform:translateY(-2px)}
+.card .thumb{position:relative;height:140px;overflow:hidden;border-bottom:1px solid var(--line);background:var(--bg)}
+.card .thumb iframe{position:absolute;top:0;left:0;width:400%;height:400%;transform:scale(.25);transform-origin:0 0;pointer-events:none;border:0}
+.card .body{padding:12px 14px;display:flex;flex-direction:column;gap:4px;flex:1}
+.card .k{display:flex;align-items:center;gap:8px}
+.card .num{font-family:var(--display);font-size:1.4rem;color:var(--aegean);line-height:1}
+.card h4{margin:0;font-size:1rem;font-weight:600}
+.card p{margin:0;font-size:.82rem;color:var(--muted)}
+.card .tags{margin-top:auto;padding-top:6px;display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:.7rem;border:1px solid var(--line);border-radius:999px;padding:0 8px;color:var(--muted)}
+.flow{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px 16px;font-size:.86rem}
+.flow code{font-family:ui-monospace,Consolas,monospace;font-size:.82rem;background:var(--bg);padding:1px 6px;border-radius:4px}
+.flow ol{margin:6px 0 0;padding-left:1.2em;display:flex;flex-direction:column;gap:3px}
+.note{font-size:.78rem;color:var(--muted)}
+
+@media (max-width:860px){
+  body{grid-template-columns:minmax(0,1fr);grid-template-rows:auto minmax(0,1fr)}
+  .rail{border-right:0;border-bottom:1px solid var(--line);padding:max(10px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) 8px max(12px,env(safe-area-inset-left,0px))}
+  .brand{border-bottom:0;padding-bottom:6px}
+  .nav{flex-direction:row;margin:0;overflow-x:auto;gap:4px;padding-bottom:4px}
+  .nav a{grid-template-columns:24px auto;padding:6px 10px 6px 6px;white-space:nowrap}
+  .nav .n{width:24px;height:24px;font-size:.85rem}
+  .nav small{display:none}
+  .rail .foot{display:none}
+  .home{padding:20px 16px 32px}
+  .ladder{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<aside class="rail">
+  <a class="brand" href="#home" aria-label="소크라테스 포털 처음 화면">
+    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+      <rect x="4" y="33" width="32" height="4" rx="1" fill="var(--line)"/>
+      <path d="M6 12 L20 4 L34 12 Z" fill="var(--aegean)"/>
+      <rect x="9" y="14" width="4" height="18" fill="var(--aegean)" opacity=".85"/>
+      <rect x="18" y="14" width="4" height="18" fill="var(--aegean)" opacity=".85"/>
+      <rect x="27" y="14" width="4" height="18" fill="var(--aegean)" opacity=".85"/>
+    </svg>
+    <div><h1>소크라테스 포털</h1><span>질문으로 확신을 흔드는 수업</span></div>
+  </a>
+  <ul class="nav" id="nav"></ul>
+  <div class="foot">학생 기록은 각 크롬북 브라우저에만 저장되고 밖으로 보내지 않습니다.</div>
+</aside>
+
+<main class="stage">
+  <div class="bar">
+    <div class="title"><h2 id="tTitle">7차시 지도</h2><span id="tSub"></span></div>
+    <div class="acts">
+      <span class="who" id="tWho" hidden></span>
+      <a class="btn" id="tOpen" href="#" target="_blank" rel="noopener" hidden>새 창으로 열기</a>
+    </div>
+  </div>
+
+  <section class="home" id="home">
+    <div class="inner">
+      <div class="hero">
+        <span class="eyebrow">소크라테스식 질문 수업 · 초등 5~6학년 · 1인 1크롬북</span>
+        <h2>답하는 사람에서 묻는 사람으로</h2>
+        <p>질문을 쏟아내고, 나누고, 올리고, 고르고, 검증하고, 대화하고, 문항으로 키우는 7단계를 서로 이어지는 일곱 개의 앱으로 진행합니다. 왼쪽에서 차시를 고르면 이 화면 안에서 앱이 열립니다.</p>
+      </div>
+
+      <div class="ladder">
+        <div style="--c:var(--f1)"><b>1층 사실 확인</b>🔍 명료화 — 무슨 뜻이야? 예를 들면?</div>
+        <div style="--c:var(--f2)"><b>2층 연결·설명</b>📎 이유·증거 — 왜? 어떻게 알아? · 🧱 가정 — 무엇을 당연하게 여겼어?</div>
+        <div style="--c:var(--f3)"><b>3층 전이·주장</b>👓 관점 · 🌊 결과 · ❓ 질문의 질문</div>
+      </div>
+
+      <div id="phases"></div>
+
+      <div class="flow">
+        <b>앱끼리 이어지는 방식</b>
+        <ol>
+          <li>질문 폭풍(1)의 목록이 질문 분류 카드(2)에 자동으로 들어갑니다.</li>
+          <li>분류 카드(2)·코치(3)·아테네 시민(5)은 <code>⟦질문⟧ 이름 | 유형 | 질문 | 사다리</code> 한 줄을 만듭니다. 학급 게시판에 모아 투표판(4)이나 서클 보드(6) 질문함에 붙여 넣습니다.</li>
+          <li>투표판(4)에서 '이 질문으로 서클 열기'를 누르면 서클 보드(6)의 탐구 질문이 바뀝니다.</li>
+          <li>코치(3)의 '워크시트로 보내기'를 누르면 질문 만들기 워크시트(7)의 발문 칸에 들어갑니다.</li>
+        </ol>
+        <p class="note" style="margin:8px 0 0">자동 연결은 같은 브라우저에서 이 포털로 열었을 때만 됩니다. 모든 앱에는 예시 데이터가 들어 있고, 각 앱의 '처음부터'·'새로 시작'으로 비울 수 있습니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <iframe id="frame" title="선택한 앱" hidden></iframe>
+</main>
+
+<script>
+const APPS=[
+ {n:1,slug:"question-storm",t:"질문 폭풍",s:"질문 쏟아내기 · QFT",d:"질문 초점을 보고 생각 1분, 쏟아내기 5분. 판단하지 않고 최대한 많이.",who:"학생",ph:0},
+ {n:2,slug:"question-sort",t:"질문 분류 카드",s:"닫힌·열린 · 6가지 질문",d:"연습 12문항, 내 질문에 유형 붙이기, 닫힌↔열린 바꿔 쓰기.",who:"학생",ph:1},
+ {n:3,slug:"question-coach",t:"질문 사다리 코치",s:"1층 → 3층 고쳐 쓰기",d:"유형을 먼저 예상하고, 힌트를 참고해 질문을 한 층씩 올립니다.",who:"학생",ph:1},
+ {n:4,slug:"question-vote",t:"질문 투표판",s:"펼치기 · 합치기 · 투표",d:"모둠 질문을 펼쳐 합치고, 투표로 학급 탐구 질문을 정합니다.",who:"교사 화면",ph:2},
+ {n:5,slug:"athens-citizen",t:"아테네 시민 챌린지",s:"과잉확신 · 확증편향 검증",d:"자신만만한 시민의 주장을 여러 종류의 질문으로 흔듭니다.",who:"학생",ph:2},
+ {n:6,slug:"socratic-circle",t:"소크라테스 서클 보드",s:"피시볼 토론 기록",d:"좌석을 눌러 질문을 기록하고, 질문 화폐와 확신도 변화를 봅니다.",who:"교사 화면",ph:2},
+ {n:7,slug:"question-worksheet",t:"질문 만들기 워크시트",s:"서·논술형 문항으로",d:"3층 질문에 자료·조건·채점기준을 붙여 문항으로 키웁니다.",who:"학생",ph:3}
+];
+const PHASES=[["공감 · 열기","1차시"],["개념 이해","2 · 3차시"],["실천","4 · 5 · 6차시"],["확장 · 성찰","7차시"]];
+const url=a=>`apps/${a.slug}/index.html`;
+const $=id=>document.getElementById(id);
+
+$("nav").innerHTML=`<li><a class="home" href="#home" data-k="home"><span class="n">⌂</span><span><b>7차시 지도</b><small>처음 화면</small></span></a></li>`+
+  APPS.map(a=>`<li><a href="#${a.n}" data-k="${a.n}"><span class="n">${a.n}</span><span><b>${a.t}</b><small>${a.s}</small></span></a></li>`).join("");
+
+$("phases").innerHTML=`<div class="cards">`+APPS.map(a=>`<a class="card" href="#${a.n}">
+    <div class="thumb"><iframe src="${url(a)}" loading="lazy" tabindex="-1" aria-hidden="true" title=""></iframe></div>
+    <div class="body"><span class="ph">${PHASES[a.ph][0]}</span><div class="k"><span class="num">${a.n}</span><h4>${a.t}</h4></div><p>${a.d}</p>
+    <div class="tags"><span class="tag">${a.s}</span><span class="tag">${a.who}</span></div></div></a>`).join("")+
+  `<div class="card more"><div class="body" style="justify-content:center"><span class="ph">공감 → 개념 이해 → 실천 → 확장</span><h4 style="font-family:var(--display);font-size:1.05rem">한 줄로 이어지는 7개 앱</h4><p>앞 차시의 결과가 다음 차시의 재료가 됩니다. 아래 연결 방식을 참고하세요.</p></div></div></div>`;
+
+let current=null;
+function show(key){
+  const a=APPS.find(x=>String(x.n)===key);
+  document.querySelectorAll("#nav a").forEach(x=>x.setAttribute("aria-current",x.dataset.k===(a?String(a.n):"home")?"page":"false"));
+  if(!a){
+    current=null;$("home").hidden=false;$("frame").hidden=true;
+    $("tTitle").textContent="7차시 지도";$("tSub").textContent="차시를 고르면 이 화면에서 앱이 열립니다";
+    $("tWho").hidden=true;$("tOpen").hidden=true;document.title="소크라테스 포털";return;
+  }
+  $("home").hidden=true;$("frame").hidden=false;
+  if(current!==a.n){$("frame").src=url(a);current=a.n}
+  $("tTitle").textContent=`${a.n}차시 · ${a.t}`;$("tSub").textContent=a.s;
+  $("tWho").textContent=a.who;$("tWho").hidden=false;
+  $("tOpen").href=url(a);$("tOpen").hidden=false;
+  document.title=`${a.t} · 소크라테스 포털`;
+}
+// 앱 안 링크로 다른 앱에 갔을 때(예: 코치 → 워크시트) 레일 표시를 맞춤
+$("frame").addEventListener("load",()=>{
+  try{
+    const p=$("frame").contentWindow.location.pathname;
+    const a=APPS.find(x=>p.includes(`/apps/${x.slug}/`));
+    if(a&&a.n!==current){current=a.n;history.replaceState(null,"",`#${a.n}`);show(String(a.n))}
+  }catch(e){}
+});
+addEventListener("hashchange",()=>show(location.hash.slice(1)||"home"));
+show(location.hash.slice(1)||"home");
+</script>
+</body>
+</html>

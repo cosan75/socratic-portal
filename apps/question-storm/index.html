@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>질문 폭풍</title>
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: 위에 질문 초점(교사 진술) 띠, 아래 왼쪽 쓰기·타이머·규칙, 오른쪽 쏟아진 질문 목록 */
+:root{
+  --bg:#eef0ec;--panel:#f8f9f6;--ink:#1f2a2a;--muted:#5f6b69;--line:#c9cfc9;
+  --aegean:#1f5f8b;--aegean-soft:#d6e5ef;--olive:#6b7a3a;--used:#d9dcd6;--warn:#9a4a1f;--ochre:#b8862b;
+  --display:"Gowun Batang","Nanum Myeongjo",serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--used:#2a3233;--warn:#e19a6f;--ochre:#d9ac55;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--used:#2a3233;--warn:#e19a6f;--ochre:#d9ac55;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.eyebrow{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+h1{font-family:var(--display);font-size:1.7rem;margin:0}
+h2{font-family:var(--display);font-size:1.1rem;margin:0}
+.note{font-size:.82rem;color:var(--muted)}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--aegean);outline-offset:2px}
+input[type=text],textarea{font:inherit;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);padding:9px;width:100%}
+.btn{border:1px solid var(--line);background:var(--bg);padding:8px 14px;border-radius:6px;font-size:.92rem}
+.btn.primary{background:var(--aegean);border-color:var(--aegean);color:var(--panel)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.focus{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--ochre);border-radius:10px;padding:14px 18px;display:flex;flex-direction:column;gap:6px}
+.focus .q{font-family:var(--display);font-size:1.4rem;line-height:1.45;margin:0;border:0;background:transparent;padding:0;resize:none}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);gap:16px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:12px}
+.rules{margin:0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media (max-width:480px){.rules{grid-template-columns:1fr}}
+.rules li{border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:.88rem;background:var(--bg)}
+.rules b{display:block;font-family:var(--display);font-size:1rem}
+.timer{display:flex;align-items:baseline;gap:10px}
+.clock{font-family:var(--display);font-size:2.4rem;font-variant-numeric:tabular-nums;line-height:1}
+.phase{font-size:.85rem;color:var(--muted)}
+.count{font-family:var(--display);font-size:2rem;color:var(--aegean);line-height:1}
+ol.list{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px;max-height:520px;overflow:auto;counter-reset:q}
+ol.list li{display:grid;grid-template-columns:2em minmax(0,1fr);gap:8px;align-items:start;border-bottom:1px dashed var(--line);padding-bottom:6px;counter-increment:q}
+ol.list li::before{content:counter(q);font-variant-numeric:tabular-nums;color:var(--muted);text-align:right}
+.qt{min-width:0;word-break:break-word}
+.qt[contenteditable="true"]{outline:1px solid var(--line);border-radius:4px;padding:0 4px}
+.tag{font-size:.74rem;color:var(--warn);border:1px solid var(--warn);border-radius:999px;padding:0 8px;margin-left:6px;white-space:nowrap;background:transparent;cursor:pointer}
+.sample{font-size:.75rem;color:var(--olive);border:1px solid var(--olive);border-radius:4px;padding:1px 6px}
+.out{font-family:ui-monospace,Consolas,monospace;font-size:.8rem;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;white-space:pre-wrap;word-break:break-all;max-height:160px;overflow:auto;user-select:all}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div><span class="eyebrow">1차시 · 질문 쏟아내기 (QFT)</span><h1>질문 폭풍</h1></div>
+    <div class="row" style="width:min(100%,260px)"><label for="name" class="note">내 이름</label><input type="text" id="name" maxlength="12" style="flex:1"></div>
+  </header>
+
+  <section class="focus">
+    <span class="eyebrow">질문 초점 · 선생님이 준 문장 (질문이 아니에요)</span>
+    <textarea class="q" id="qfocus" rows="2" aria-label="질문 초점"></textarea>
+  </section>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>질문 쏟아내기의 네 가지 약속</h2>
+      <ul class="rules">
+        <li><b>최대한 많이</b>떠오르는 대로 다 써요.</li>
+        <li><b>판단하지 않기</b>좋다·나쁘다, 답하기 모두 멈춰요.</li>
+        <li><b>그대로 적기</b>떠오른 말 그대로 써요.</li>
+        <li><b>문장은 질문으로</b>"~이다"는 "~일까?"로 바꿔요.</li>
+      </ul>
+      <div class="timer">
+        <span class="clock" id="clock">1:00</span>
+        <span class="phase" id="phase">생각 시간 1분 → 쏟아내기 5분</span>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="startBtn">생각 시간 시작</button>
+        <button class="btn" id="skipBtn">바로 쏟아내기</button>
+      </div>
+      <div>
+        <label for="q" class="note">질문 쓰고 Enter</label>
+        <input type="text" id="q" placeholder="예) 착한 거짓말은 누가 정할까?">
+      </div>
+      <p class="note" id="hint" style="margin:0;min-height:1.3em"></p>
+    </section>
+
+    <section class="panel">
+      <div class="row" style="justify-content:space-between">
+        <div class="row"><span class="count" id="count">0</span><span class="note">개의 질문</span> <span id="sampleTag"></span></div>
+        <button class="btn" id="newBtn">내 질문 시작</button>
+      </div>
+      <ol class="list" id="list"></ol>
+      <p class="note" style="margin:0">'문장' 표시를 누르면 그 줄을 질문으로 고칠 수 있어요. 지우기 버튼은 일부러 없어요.</p>
+      <details>
+        <summary class="note">다음 시간(질문 분류 카드)으로 넘기기</summary>
+        <p class="note">빛돌 포털에서는 자동으로 넘어가요. 다른 곳에서 열었다면 아래 목록을 복사해 붙여 넣으세요.</p>
+        <div class="out" id="out"></div>
+        <div class="row" style="margin-top:6px"><button class="btn" id="copyBtn">목록 복사</button><span class="note" id="copyNote"></span></div>
+      </details>
+    </section>
+  </div>
+</div>
+
+<script>
+const KEY="question-storm-v1";
+const SAMPLE=["착한 거짓말은 누가 정할까?","착한 거짓말을 들으면 기분이 좋을까?","거짓말은 다 나쁜 거야?","엄마도 착한 거짓말을 할까?","착한 거짓말이 들키면 어떻게 될까?","거짓말을 안 하는 사람이 있을까?"];
+let S={name:"",focus:"거짓말은 나쁘다. 그런데 착한 거짓말도 있다.",qs:[]};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+if(!S.qs.length&&!S.started){S.example=true;S.qs=SAMPLE.map(t=>({t}))}
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function save(){if(S.example)return;try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const isQ=t=>/[?？]\s*$|(까|니|나|냐|가|요|죠|지|래|어|야)\s*$/.test(t.trim());
+
+function render(){
+  $("count").textContent=S.example?0:S.qs.length;
+  $("sampleTag").innerHTML=S.example?'<span class="sample">예시 질문</span>':"";
+  $("list").innerHTML=S.qs.length?S.qs.map((q,i)=>`<li><span><span class="qt" data-i="${i}">${esc(q.t)}</span>${isQ(q.t)?"":`<button class="tag" data-i="${i}">문장 → 질문으로</button>`}</span></li>`).join("")
+    :`<li style="grid-template-columns:1fr" class="note">아직 질문이 없어요. 왼쪽에 쓰고 Enter를 누르세요.</li>`;
+  $("list").querySelectorAll(".tag").forEach(b=>b.onclick=()=>{
+    const el=$("list").querySelector(`.qt[data-i="${b.dataset.i}"]`);el.contentEditable="true";el.focus();
+    el.onblur=()=>{el.contentEditable="false";const v=el.textContent.trim();if(v&&!S.example){S.qs[+el.dataset.i].t=v;save()}render()};
+    el.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();el.blur()}};
+  });
+  $("out").textContent=`이름: ${S.name||"이름없음"}\n초점: ${S.focus}\n`+S.qs.map((q,i)=>`${i+1}. ${q.t}`).join("\n");
+}
+function add(){
+  const v=$("q").value.trim();if(!v)return;
+  if(S.example){S={name:S.name,focus:S.focus,qs:[],started:true}}
+  S.started=true;S.qs.push({t:v});$("q").value="";
+  $("hint").textContent=isQ(v)?"":"방금 쓴 건 문장이에요. 나중에 '문장 → 질문으로'를 눌러 바꿔요. 지금은 계속 쏟아내요!";
+  save();render();$("list").scrollTop=$("list").scrollHeight;
+}
+$("q").onkeydown=e=>{if(e.key==="Enter"&&!e.isComposing){e.preventDefault();add()}};
+$("newBtn").onclick=()=>{S={name:S.name,focus:S.focus,qs:[],started:true};$("hint").textContent="";save();render();$("q").focus()};
+$("name").value=S.name;$("name").oninput=()=>{S.name=$("name").value.trim();save();render()};
+$("qfocus").value=S.focus;$("qfocus").oninput=()=>{S.focus=$("qfocus").value;save();render()};
+
+// 타이머: 생각 1분 → 쏟아내기 5분
+let left=0,phase=0,iv=null;
+function tick(){
+  left--;const m=Math.floor(Math.max(0,left)/60),s=Math.max(0,left)%60;$("clock").textContent=`${m}:${String(s).padStart(2,"0")}`;
+  if(left<=0){clearInterval(iv);
+    if(phase===1)startPhase(2);
+    else{$("phase").textContent=`끝! ${S.example?0:S.qs.length}개의 질문을 쏟아냈어요.`;$("q").disabled=false;$("startBtn").textContent="다시 시작"}}
+}
+function startPhase(p){
+  phase=p;clearInterval(iv);left=p===1?60:300;
+  $("clock").textContent=p===1?"1:00":"5:00";
+  $("phase").textContent=p===1?"생각 시간: 조용히 떠올리기만 해요":"쏟아내기: 판단하지 말고 계속!";
+  $("q").disabled=p===1;if(p===2)$("q").focus();
+  iv=setInterval(tick,1000);
+}
+$("startBtn").onclick=()=>startPhase(1);
+$("skipBtn").onclick=()=>startPhase(2);
+$("copyBtn").onclick=()=>{const t=$("out").textContent;const ok=()=>$("copyNote").textContent="복사했어요.";
+  const fb=()=>{const r=document.createRange();r.selectNodeContents($("out"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("copyNote").textContent="선택됐어요. Ctrl+C로 복사하세요."};
+  try{navigator.clipboard.writeText(t).then(ok,fb)}catch(e){fb()}};
+render();
+</script>
+</body>
+</html>

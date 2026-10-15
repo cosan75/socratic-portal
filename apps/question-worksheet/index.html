@@ -1,0 +1,285 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name=viewport content="width=device-width,initial-scale=1"><style>:root{color-scheme:light}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found]){display:none!important}</style></head><body>
+<title>질문 만들기 워크시트</title>
+<meta name="description" content="학생·교사용 서·논술형 질문 만들기 워크시트 — 발문·자료·조건·채점기준을 사다리로 채우고 인쇄">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Gothic+A1:wght@400;600;700;800;900&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap');
+  :root{
+    --bg:#f4f6fb; --surface:#ffffff; --surface-2:#eef1f8; --surface-3:#e7ebf5;
+    --border:#dde3f0; --border-strong:#c7cfe2;
+    --ink:#171c2b; --ink-soft:#454e66; --muted:#7b839a;
+    --blue:#2554e6; --blue-bg:#e9effe; --blue-ink:#173a9e;
+    --purple:#7a35d6; --purple-bg:#f1e9fd; --purple-ink:#551f9e;
+    --green:#0a8a5f; --green-bg:#e2f6ee; --green-ink:#0a6046;
+    --amber:#b06a00; --amber-bg:#fbefda; --amber-ink:#7a4a00;
+    --shadow:0 1px 2px rgba(20,28,50,.05), 0 8px 24px -14px rgba(20,28,50,.18);
+    --radius:14px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0d0f16; --surface:#151824; --surface-2:#1c2030; --surface-3:#232839;
+      --border:#2a3043; --border-strong:#3a4258;
+      --ink:#eef0f7; --ink-soft:#b3bacd; --muted:#828aa2;
+      --blue:#7ea0ff; --blue-bg:#17203b; --blue-ink:#b9caff;
+      --purple:#bd97ff; --purple-bg:#23193b; --purple-ink:#dcc9ff;
+      --green:#43d59f; --green-bg:#122e26; --green-ink:#8bebc7;
+      --amber:#e6a94e; --amber-bg:#2c2313; --amber-ink:#f0c98a;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -16px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0d0f16; --surface:#151824; --surface-2:#1c2030; --surface-3:#232839;
+    --border:#2a3043; --border-strong:#3a4258;
+    --ink:#eef0f7; --ink-soft:#b3bacd; --muted:#828aa2;
+    --blue:#7ea0ff; --blue-bg:#17203b; --blue-ink:#b9caff;
+    --purple:#bd97ff; --purple-bg:#23193b; --purple-ink:#dcc9ff;
+    --green:#43d59f; --green-bg:#122e26; --green-ink:#8bebc7;
+    --amber:#e6a94e; --amber-bg:#2c2313; --amber-ink:#f0c98a;
+    --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -16px rgba(0,0,0,.7);
+  }
+  *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0; background:var(--bg); color:var(--ink);
+    font-family:"IBM Plex Sans KR",system-ui,sans-serif; line-height:1.6;
+    word-break:keep-all; overflow-wrap:anywhere}
+  .wrap{max-width:860px; margin:0 auto; padding:clamp(18px,4vw,44px) clamp(14px,4vw,30px) 72px}
+  h1,h2,h3,.disp{font-family:"Gothic A1",system-ui,sans-serif}
+  .eyebrow{font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:11.5px; letter-spacing:.14em; text-transform:uppercase; color:var(--blue)}
+  h1{font-size:clamp(24px,4.5vw,38px); font-weight:900; line-height:1.14; margin:.3em 0 .25em; letter-spacing:-.01em}
+  .lede{font-size:14px; color:var(--ink-soft); margin:0; max-width:64ch}
+
+  .toolbar{display:flex; flex-wrap:wrap; gap:9px; margin:18px 0 6px}
+  .btn{font-family:inherit; font-size:13px; font-weight:600; border:1px solid var(--border-strong); background:var(--surface); color:var(--ink-soft); padding:9px 15px; border-radius:9px; cursor:pointer; transition:.12s}
+  .btn:hover{background:var(--surface-2); color:var(--ink)}
+  .btn.primary{background:var(--blue); color:#fff; border-color:var(--blue)}
+  .btn.primary:hover{filter:brightness(1.05); color:#fff}
+  .btn:focus-visible{outline:2px solid var(--blue); outline-offset:2px}
+  .saved{font-size:12px; color:var(--muted); align-self:center}
+
+  .info{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px 16px; margin:14px 0 24px}
+  .info .f{display:flex; flex-direction:column; gap:4px}
+  .info label{font-family:"IBM Plex Mono",monospace; font-size:10px; font-weight:600; letter-spacing:.05em; text-transform:uppercase; color:var(--muted)}
+  .info input{border:none; border-bottom:1.5px solid var(--border-strong); background:transparent; color:var(--ink); font-family:inherit; font-size:14px; padding:4px 2px; outline:none}
+  .info input:focus{border-color:var(--blue)}
+
+  .step{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px 20px; margin-bottom:18px}
+  .step .sh{display:flex; align-items:center; gap:11px; margin-bottom:6px}
+  .step .num{flex:none; width:30px; height:30px; border-radius:9px; display:grid; place-items:center; font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:15px; color:#fff; background:var(--blue)}
+  .step.s2 .num{background:var(--purple)} .step.s3 .num{background:var(--green)} .step.s4 .num{background:var(--amber)} .step.s5 .num{background:var(--blue)}
+  .step h2{margin:0; font-size:18px; font-weight:800}
+  .step .desc{font-size:12.5px; color:var(--muted); margin:0 0 14px 41px}
+  textarea, .info input, .cell input{font-family:inherit}
+  textarea{width:100%; border:1.5px solid var(--border-strong); border-radius:10px; padding:11px 13px; font-size:14.5px; line-height:1.6; background:var(--surface); color:var(--ink); outline:none; resize:vertical}
+  textarea:focus{border-color:var(--blue)}
+  .lab{display:block; font-size:12.5px; font-weight:600; color:var(--ink-soft); margin:10px 0 6px}
+  .lab:first-child{margin-top:0}
+
+  /* ladder */
+  .ladder{display:flex; flex-direction:column; gap:9px; margin-bottom:6px}
+  .rung{border:1.5px solid var(--border); border-radius:11px; padding:11px 14px; cursor:pointer; transition:.12s; background:var(--surface)}
+  .rung:hover{background:var(--surface-2)}
+  .rung.sel{border-color:var(--blue); background:var(--blue-bg)}
+  .rung .rt{font-weight:700; font-size:14px; display:flex; align-items:center; gap:8px}
+  .rung .rtag{font-family:"IBM Plex Mono",monospace; font-size:10px; font-weight:600; padding:2px 7px; border-radius:5px; background:var(--surface-3); color:var(--muted)}
+  .rung.sel .rtag{background:var(--blue); color:#fff}
+  .rung .rd{font-size:12px; color:var(--muted); margin-top:3px}
+  .rung.r1{border-left:4px solid var(--green)} .rung.r2{border-left:4px solid var(--blue)} .rung.r3{border-left:4px solid var(--purple)}
+
+  .helpers{margin:4px 0 12px}
+  .helpers .ht{font-size:11.5px; color:var(--muted); margin-bottom:7px}
+  .chips{display:flex; flex-wrap:wrap; gap:7px}
+  .chipbtn{font-family:inherit; font-size:12.5px; border:1px dashed var(--border-strong); background:var(--surface); color:var(--ink-soft); padding:6px 11px; border-radius:999px; cursor:pointer; transition:.12s}
+  .chipbtn:hover{border-style:solid; border-color:var(--purple); color:var(--purple-ink); background:var(--purple-bg)}
+
+  /* conditions */
+  .conds{display:flex; flex-direction:column; gap:8px}
+  .cond{display:flex; align-items:center; gap:10px; font-size:13.5px}
+  .cond input[type=checkbox]{appearance:none;-webkit-appearance:none; width:19px;height:19px;flex:none; border:2px solid var(--border-strong); border-radius:6px; background:var(--surface); cursor:pointer; position:relative}
+  .cond input[type=checkbox]:checked{background:var(--amber); border-color:var(--amber)}
+  .cond input[type=checkbox]:checked::after{content:"";position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  .cond .ci{flex:1; border:none; border-bottom:1.5px solid var(--border); background:transparent; color:var(--ink); font-size:13.5px; padding:3px 2px; outline:none}
+  .cond .ci:focus{border-color:var(--amber)}
+
+  /* scoring mini table */
+  .scoretable{width:100%; border-collapse:collapse; margin-top:4px}
+  .scoretable th{font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600; text-transform:uppercase; letter-spacing:.04em; color:var(--muted); text-align:left; padding:6px 8px; border-bottom:1px solid var(--border-strong)}
+  .scoretable td{padding:6px 8px; border-bottom:1px solid var(--border); vertical-align:top}
+  .scoretable input{width:100%; border:none; border-bottom:1.5px solid var(--border); background:transparent; color:var(--ink); font-size:13px; padding:5px 2px; outline:none}
+  .scoretable input:focus{border-color:var(--blue)}
+  .scoretable .pc{font-family:"IBM Plex Mono",monospace; font-weight:600; color:var(--ink-soft); white-space:nowrap; width:36px; text-align:center}
+
+  /* self-check */
+  .selfcheck{background:var(--green-bg); border-radius:var(--radius); padding:16px 18px}
+  .selfcheck h2{margin:0 0 10px; font-size:16px; font-weight:800; color:var(--green-ink)}
+  .selfcheck ul{list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:9px}
+  .selfcheck label{display:flex; gap:10px; align-items:flex-start; font-size:13.5px; color:var(--ink); cursor:pointer}
+  .selfcheck input{appearance:none;-webkit-appearance:none; width:19px;height:19px;flex:none;margin-top:1px; border:2px solid var(--green); border-radius:6px; background:var(--surface); cursor:pointer; position:relative}
+  .selfcheck input:checked{background:var(--green)}
+  .selfcheck input:checked::after{content:"";position:absolute;left:5px;top:1px;width:5px;height:10px;border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+
+  footer{margin-top:30px; padding-top:18px; border-top:1px solid var(--border); font-size:12px; color:var(--muted); line-height:1.7}
+  footer code{font-family:"IBM Plex Mono",monospace; font-size:11px; background:var(--surface-2); padding:1px 6px; border-radius:5px}
+
+  @media (max-width:640px){ .info{grid-template-columns:1fr 1fr} }
+  @media print{
+    :root{--bg:#fff;--surface:#fff;--surface-2:#fff;--surface-3:#f2f2f2;--border:#bbb;--border-strong:#777;--ink:#000;--ink-soft:#222;--muted:#555;--shadow:none}
+    body{background:#fff}.wrap{max-width:none;padding:0}.noprint{display:none!important}
+    .step,.info,.selfcheck{box-shadow:none;border:1px solid #999;break-inside:avoid}
+    .rung.sel{background:#eee!important} .chipbtn{display:none}
+    textarea{min-height:70px}
+  }
+</style>
+
+<div class="wrap">
+  <header>
+    <p class="eyebrow">서·논술형 · 질문 만들기</p>
+    <h1>질문 만들기 워크시트</h1>
+    <p class="lede">좋은 서·논술형 질문은 <b>발문 + 자료 + 조건</b>, 그리고 <b>채점기준</b>으로 이루어져요. 5단계를 차례로 채우면 나만의 질문이 완성됩니다. 도우미 문장을 눌러 발문에 넣어 보세요.</p>
+    <div class="toolbar noprint">
+      <button class="btn primary" id="print">🖨 인쇄</button>
+      <button class="btn" id="reset">새로 만들기</button>
+      <span class="saved" id="saved"></span>
+    </div>
+  </header>
+
+  <div class="info">
+    <div class="f"><label>이름</label><input type="text" data-k="name"></div>
+    <div class="f"><label>학년 · 반</label><input type="text" data-k="class"></div>
+    <div class="f"><label>교과</label><input type="text" data-k="subject" placeholder="예: 국어"></div>
+    <div class="f"><label>단원</label><input type="text" data-k="unit"></div>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step s1">
+    <div class="sh"><span class="num">1</span><h2>무엇을 물을까?</h2></div>
+    <p class="desc">이번 시간에 배운 것 중에서, 친구가 <b>생각해서</b> 답해야 할 주제를 하나 고르세요.</p>
+    <span class="lab">배운 개념·주제</span>
+    <textarea data-k="topic" rows="2" placeholder="예: 글을 요약하는 방법 / 통상 수교 찬반 / 물체의 운동"></textarea>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step s2">
+    <div class="sh"><span class="num">2</span><h2>자료 고르기</h2></div>
+    <p class="desc">답의 <b>근거가 될 자료</b>(글·그림·표·사진)를 정해요. 자료 없이 풀 수 있으면 좋은 질문이 아니에요.</p>
+    <span class="lab">자료 붙이기 / 자료 설명</span>
+    <textarea data-k="source" rows="4" placeholder="여기에 자료를 붙이거나, 어떤 자료인지 설명을 써요. (예: 한지의 쓰임을 설명한 글 / 문화재 사진 2장 / 수출입 표)"></textarea>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step s3">
+    <div class="sh"><span class="num">3</span><h2>질문 사다리로 발문 만들기</h2></div>
+    <p class="desc">어느 <b>사다리 층</b>의 질문을 만들지 고르고, 아래 도우미 문장을 눌러 발문을 완성하세요.</p>
+    <div class="ladder">
+      <div class="rung r1" data-rung="0"><div class="rt"><span class="rtag">1층</span>사실 확인</div><div class="rd">자료에서 찾기·요약하기</div></div>
+      <div class="rung r2" data-rung="1"><div class="rt"><span class="rtag">2층</span>연결·설명</div><div class="rd">까닭 설명·비교·근거 들기</div></div>
+      <div class="rung r3" data-rung="2"><div class="rt"><span class="rtag">3층</span>전이·주장</div><div class="rd">역할 취하기·찬반 주장·해결책</div></div>
+    </div>
+    <div class="helpers">
+      <div class="ht">✎ 도우미 문장 (누르면 발문에 추가)</div>
+      <div class="chips" id="chips"></div>
+    </div>
+    <span class="lab">나의 발문</span>
+    <textarea data-k="prompt" id="prompt" rows="3" placeholder="여기에 질문(발문)을 써요."></textarea>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step s4">
+    <div class="sh"><span class="num">4</span><h2>조건 정하기</h2></div>
+    <p class="desc">답을 어떻게 써야 하는지 <b>조건</b>을 정해요. 꼭 필요한 것만, 너무 많지 않게!</p>
+    <div class="conds">
+      <div class="cond"><input type="checkbox" data-k="c_len"><span>분량:</span><input class="ci" data-k="c_len_v" placeholder="예: 두세 문장 / 100~150자"></div>
+      <div class="cond"><input type="checkbox" data-k="c_src"><span>자료 활용:</span><input class="ci" data-k="c_src_v" placeholder="예: 자료에서 근거를 찾아 쓸 것"></div>
+      <div class="cond"><input type="checkbox" data-k="c_word"><span>표현·낱말:</span><input class="ci" data-k="c_word_v" placeholder="예: ‘때문이다’를 넣어 쓸 것"></div>
+      <div class="cond"><input type="checkbox" data-k="c_etc"><span>그 밖에:</span><input class="ci" data-k="c_etc_v" placeholder="예: 근거 2가지 / 서론·본론·결론"></div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step s5">
+    <div class="sh"><span class="num">5</span><h2>채점기준 만들기</h2></div>
+    <p class="desc">무엇을 보고 점수를 줄지 <b>채점요소</b>를 정하고, 2·1·0점일 때 답이 어떤 모습인지 써요.</p>
+    <table class="scoretable">
+      <thead><tr><th style="width:26%">채점요소</th><th class="pc">2점</th><th>2점일 때 답의 모습</th></tr></thead>
+      <tbody>
+        <tr><td><input data-k="e1" placeholder="예: 근거의 타당성"></td><td class="pc">2</td><td><input data-k="e1_2" placeholder="자료를 근거로 정확히 썼다"></td></tr>
+        <tr><td></td><td class="pc">1</td><td><input data-k="e1_1" placeholder="근거를 썼으나 일부 부족"></td></tr>
+        <tr><td></td><td class="pc">0</td><td><input data-k="e1_0" placeholder="근거가 없거나 자료와 무관"></td></tr>
+        <tr><td><input data-k="e2" placeholder="예: 표현·짜임"></td><td class="pc">2</td><td><input data-k="e2_2" placeholder="조건에 맞는 표현·짜임"></td></tr>
+        <tr><td></td><td class="pc">1</td><td><input data-k="e2_1" placeholder="일부만 지킴"></td></tr>
+        <tr><td></td><td class="pc">0</td><td><input data-k="e2_0" placeholder="지키지 못함"></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SELF CHECK -->
+  <div class="selfcheck">
+    <h2>✔ 스스로 점검</h2>
+    <ul>
+      <li><label><input type="checkbox" data-k="k1"><span>자료가 <b>없으면</b> 답을 못 쓰나요? (자료가 꼭 필요한가)</span></label></li>
+      <li><label><input type="checkbox" data-k="k2"><span>자료를 <b>그대로 옮기면</b> 정답이 <b>안</b> 되나요? (생각을 요구하는가)</span></label></li>
+      <li><label><input type="checkbox" data-k="k3"><span>발문만 읽고 <b>무엇을 쓸지</b> 분명한가요?</span></label></li>
+      <li><label><input type="checkbox" data-k="k4"><span>채점요소로 <b>친구 답을 채점</b>할 수 있나요?</span></label></li>
+    </ul>
+  </div>
+
+  <footer>
+    근거: KICE 「초등학교 서·논술형 평가도구 자료집」 <code>ORM 2021-125</code>의 5단계 개발·문항 3요소·채점기준표를 학생용으로 재구성 · AI 정리(Claude). 완성한 질문은 교사 검토 후 공모전·문항은행으로.
+  </footer>
+</div>
+
+<script>
+const STARTERS = [
+  ["○○은 무엇인가요? 자료에서 찾아 써 봅시다.", "○○을 한 문장으로 요약하면?", "자료에서 ○○에 해당하는 부분에 밑줄을 그어 봅시다."],
+  ["왜 ○○일까요? 자료를 근거로 까닭을 설명해 봅시다.", "○○와 △△는 어떻게 다른가요?", "자료를 근거로 ○○을 설명해 봅시다."],
+  ["내가 만약 ○○라면 어떤 선택을 할까요? 근거 2가지를 들어 봅시다.", "○○에 찬성하나요, 반대하나요? 자료를 근거로 주장해 봅시다.", "○○ 문제를 해결할 방법을 제안하고 까닭을 써 봅시다."]
+];
+let rung = 1;
+const chips = document.getElementById("chips");
+const promptTa = document.getElementById("prompt");
+
+function renderChips(){
+  chips.innerHTML = STARTERS[rung].map((s,i)=>`<button class="chipbtn" data-i="${i}">${s}</button>`).join("");
+}
+function selRung(r){
+  rung = r;
+  document.querySelectorAll(".rung").forEach((x,i)=>x.classList.toggle("sel", i===r));
+  renderChips(); save();
+}
+document.querySelectorAll(".rung").forEach((el,i)=>el.addEventListener("click",()=>selRung(i)));
+chips.addEventListener("click",e=>{
+  const b=e.target.closest(".chipbtn"); if(!b) return;
+  const s=STARTERS[rung][+b.dataset.i];
+  promptTa.value = (promptTa.value.trim() ? promptTa.value.trim()+" " : "") + s;
+  promptTa.focus(); save();
+});
+
+/* autosave (per-browser) */
+const KEY="qmake-draft-v1";
+const fields=()=>[...document.querySelectorAll("[data-k]")];
+function save(){
+  try{
+    const o={_rung:rung};
+    fields().forEach(f=>{ o[f.dataset.k] = (f.type==="checkbox")?f.checked:f.value; });
+    localStorage.setItem(KEY, JSON.stringify(o));
+    const s=document.getElementById("saved"); s.textContent="자동 저장됨"; clearTimeout(s._t); s._t=setTimeout(()=>s.textContent="",1500);
+  }catch(e){}
+}
+function load(){
+  try{
+    const raw=localStorage.getItem(KEY); if(!raw) { selRung(1); return; }
+    const o=JSON.parse(raw);
+    fields().forEach(f=>{ if(o[f.dataset.k]!==undefined){ if(f.type==="checkbox") f.checked=o[f.dataset.k]; else f.value=o[f.dataset.k]; } });
+    selRung(typeof o._rung==="number"?o._rung:1);
+  }catch(e){ selRung(1); }
+}
+document.addEventListener("input",e=>{ if(e.target.closest("[data-k]")) save(); });
+document.getElementById("print").addEventListener("click",()=>window.print());
+document.getElementById("reset").addEventListener("click",()=>{
+  if(!confirm("작성한 내용을 모두 지울까요?")) return;
+  fields().forEach(f=>{ if(f.type==="checkbox") f.checked=false; else f.value=""; });
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  selRung(1);
+});
+load();
+</script>
+
+</body></html>

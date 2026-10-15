@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>질문 사다리 코치</title>
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: 왼쪽 질문 작성·코치 피드백, 오른쪽 세로 사다리(내 질문의 성장 기록). 좁으면 위아래로 쌓임 */
+:root{
+  --bg:#eef0ec;--panel:#f8f9f6;--ink:#1f2a2a;--muted:#5f6b69;--line:#c9cfc9;
+  --aegean:#1f5f8b;--aegean-soft:#d6e5ef;--olive:#6b7a3a;--used:#d9dcd6;--warn:#9a4a1f;
+  --t1:#1f5f8b;--t2:#7a5c1e;--t3:#2f7a55;--t4:#6a4a8c;--t5:#2a7c8a;--t6:#9a3d4f;
+  --display:"Gowun Batang","Nanum Myeongjo",serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--used:#2a3233;--warn:#e19a6f;
+  --t1:#6fb0dc;--t2:#d4ae62;--t3:#6cc497;--t4:#b494d8;--t5:#62c2cf;--t6:#e08597;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--used:#2a3233;--warn:#e19a6f;
+  --t1:#6fb0dc;--t2:#d4ae62;--t3:#6cc497;--t4:#b494d8;--t5:#62c2cf;--t6:#e08597;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
+.wrap{max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{border-bottom:1px solid var(--line);padding-bottom:12px;display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+h1{font-family:var(--display);font-size:1.7rem;margin:0;text-wrap:balance}
+.grid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px}
+@media (max-width:780px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:12px}
+h2{font-family:var(--display);font-size:1.1rem;margin:0}
+label{font-size:.82rem;color:var(--muted);display:block;margin-bottom:4px}
+input[type=text],textarea{font:inherit;width:100%;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--ink);padding:9px}
+textarea{font-size:1.05rem;resize:vertical}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:10px}
+@media (max-width:480px){.two{grid-template-columns:1fr}}
+.topic{font-family:var(--display);font-size:1.15rem;color:var(--aegean)}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--aegean);outline-offset:2px}
+.btn{border:1px solid var(--line);background:var(--bg);padding:8px 14px;border-radius:6px;font-size:.92rem}
+.btn.primary{background:var(--aegean);border-color:var(--aegean);color:var(--panel)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+@media (max-width:480px){.picks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pick{border:1.5px solid var(--c);background:var(--panel);border-radius:8px;padding:6px 8px;text-align:left;font-size:.88rem}
+.pick b{color:var(--c)}
+.pick[aria-pressed="true"]{background:var(--c);color:var(--panel)}
+.pick[aria-pressed="true"] b{color:var(--panel)}
+.coach{border:1px solid var(--line);border-left:4px solid var(--c,var(--aegean));border-radius:8px;padding:12px 14px;background:var(--bg);display:flex;flex-direction:column;gap:6px}
+.coach .head{font-family:var(--display);font-size:1.05rem}
+.coach p{margin:0}
+.stems{display:flex;flex-wrap:wrap;gap:6px}
+.stem{font-size:.85rem;border:1px dashed var(--c);color:var(--c);border-radius:999px;padding:2px 10px;background:transparent}
+.ladder{list-style:none;margin:0;padding:0;display:flex;flex-direction:column-reverse;gap:8px}
+.rung{display:grid;grid-template-columns:3em minmax(0,1fr);gap:10px;align-items:start}
+.lv{font-family:var(--display);font-size:1.1rem;text-align:center;border:1.5px solid var(--line);border-radius:6px;padding:2px 0;color:var(--muted)}
+.rung.on .lv{border-color:var(--c);color:var(--c)}
+.rung .q{font-size:.92rem}
+.chip{font-size:.74rem;padding:1px 8px;border-radius:999px;border:1px solid var(--c);color:var(--c);white-space:nowrap}
+.note{font-size:.82rem;color:var(--muted)}
+.msg{font-size:.88rem;color:var(--warn);min-height:1.3em;margin:0}
+.out{font-family:ui-monospace,Consolas,monospace;font-size:.82rem;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;word-break:break-all;user-select:all}
+.meter{display:flex;gap:4px}
+.meter i{flex:1;height:8px;border-radius:2px;background:var(--used)}
+.meter i.f{background:var(--olive)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">소크라테스식 질문 만들기 · 1인 1크롬북</span>
+    <h1>질문 사다리 코치</h1>
+    <span class="note">코치는 질문을 대신 써 주지 않아요. 내 질문이 어떤 종류인지 알려 주고, 한 칸 올라갈 힌트만 줘요.</span>
+  </header>
+
+  <div class="grid">
+    <section class="panel">
+      <div class="two">
+        <div><label for="name">내 이름</label><input type="text" id="name" maxlength="12"></div>
+        <div><label for="topic">탐구 질문 (선생님이 알려 준 질문)</label><input type="text" id="topic"></div>
+      </div>
+
+      <div>
+        <label for="q">내 질문 쓰기</label>
+        <textarea id="q" rows="3" placeholder="예) 착한 거짓말이 뭐야?"></textarea>
+      </div>
+
+      <div>
+        <label>내 질문은 어떤 종류일까? 먼저 골라 보세요</label>
+        <div class="picks" id="picks"></div>
+      </div>
+
+      <div class="row">
+        <button class="btn primary" id="checkBtn">코치에게 보여 주기</button>
+        <span class="note" id="countNote"></span>
+      </div>
+      <p class="msg" id="msg" aria-live="polite"></p>
+      <div id="coach"></div>
+    </section>
+
+    <aside class="panel">
+      <h2>내 질문 사다리</h2>
+      <div class="meter" aria-label="사다리 높이"><i></i><i></i><i></i></div>
+      <span class="note" id="floorNote"></span>
+      <ol class="ladder" id="ladder"></ol>
+      <div id="submitBox" hidden>
+        <h2 style="margin-bottom:6px">선생님께 보내기</h2>
+        <p class="note" style="margin:0 0 6px">아래 줄을 복사해서 학급 게시판(클래스룸 댓글 등)에 붙여 넣으세요.</p>
+        <div class="out" id="out"></div>
+        <div class="row" style="margin-top:8px"><button class="btn primary" id="copyBtn">복사하기</button><span class="note" id="copyNote"></span></div>
+        <h2 style="margin:14px 0 6px">서·논술형 문항으로 키우기</h2>
+        <p class="note" style="margin:0 0 6px">이 질문을 '질문 만들기 워크시트'의 발문 칸에 넣어요. 워크시트에서 자료·조건·채점기준을 붙이면 문항이 됩니다.</p>
+        <div class="row"><button class="btn" id="wsBtn">워크시트로 보내기</button><a class="note" id="wsLink" href="#" hidden>워크시트 열기 →</a></div>
+        <p class="note" id="wsNote" style="margin:4px 0 0"></p>
+      </div>
+      <button class="btn" id="resetBtn">새 질문 시작</button>
+    </aside>
+  </div>
+</div>
+
+<script>
+const TYPES=[
+ {k:"clar",e:"🔍",n:"명료화",lv:1,c:"--t1",d:"뜻이나 예시를 묻는 질문"},
+ {k:"evid",e:"📎",n:"이유·증거",lv:2,c:"--t3",d:"왜, 어떻게 아는지 묻는 질문"},
+ {k:"assm",e:"🧱",n:"가정",lv:2,c:"--t2",d:"당연하게 여긴 것을 묻는 질문"},
+ {k:"view",e:"👓",n:"관점",lv:3,c:"--t4",d:"다른 사람의 눈으로 보는 질문"},
+ {k:"cons",e:"🌊",n:"결과",lv:3,c:"--t5",d:"그러면 어떻게 될지 묻는 질문"},
+ {k:"meta",e:"❓",n:"질문의 질문",lv:3,c:"--t6",d:"질문 자체를 따져 보는 질문"}
+];
+const T=Object.fromEntries(TYPES.map(t=>[t.k,t]));
+// 질문 만들기 워크시트·KCBC와 같은 3층 사다리 이름
+const FLOOR={1:"사실 확인",2:"연결·설명",3:"전이·주장"};
+// 빛돌 포털 안 '질문 만들기 워크시트' 위치 (폴더 이름이 다르면 여기만 고치세요)
+const WORKSHEET_URL="../question-worksheet/index.html";
+const WS_KEY="qmake-draft-v1";
+// 교사가 링크 끝에 #nohint 를 붙여 주면 말머리 힌트를 숨김
+const NOHINT=location.hash==="#nohint";
+// 우선순위가 높은(깊은) 유형부터 검사
+const RULES=[
+ ["meta",[/이\s*질문/,/질문이\s*왜/,/먼저\s*(답|알아)/,/무엇을\s*물/,/어떤\s*질문/,/질문\s*자체/]],
+ ["cons",[/만약/,/모두가/,/모든\s*사람이/,/다들/,/그러면\s*어떻게/,/어떻게\s*될/,/결과/,/앞으로/,/계속\s*하면/,/나중에/,/영향/]],
+ ["view",[/다른\s*사람/,/반대/,/입장/,/상대/,/관점/,/다르게\s*(볼|생각)/,/(이|가)라면\s*어떻게\s*생각/,/의\s*마음/,/기분/]],
+ ["assm",[/당연/,/항상/,/언제나/,/꼭\s/,/반드시/,/원래/,/전제/,/가정/,/모든\s*경우/,/무조건/]],
+ ["evid",[/왜/,/근거/,/어떻게\s*알/,/증거/,/이유/,/확실/,/믿을\s*수/,/어떻게\s*확인/]],
+ ["clar",[/뜻/,/의미/,/예를\s*들/,/무슨\s*말/,/정확히/,/무엇/,/뭐야/,/뭘까/,/란\s*뭐/,/이란/]]
+];
+const HINT={
+ clar:{say:"뜻을 분명히 하는 좋은 출발이에요. 이제 '왜'를 물어 사다리를 올라가 볼까요?",stems:["왜 그렇게 생각해?","어떻게 알 수 있어?","무엇을 당연하게 여긴 걸까?"]},
+ evid:{say:"근거를 묻는 단단한 질문이에요. 한 칸 더 올라가려면 다른 사람의 눈이나 결과를 상상해 보세요.",stems:["반대편 사람이라면?","모두가 그렇게 하면 어떻게 될까?","듣는 사람의 기분은?"]},
+ assm:{say:"숨은 전제를 찾았어요. 그 전제가 무너지면 어떻게 될지 이어서 물어보세요.",stems:["만약 그 생각이 틀리다면?","모두가 그렇게 하면?","다른 사람은 그걸 당연하게 볼까?"]},
+ view:{say:"다른 사람의 자리에 서 본 깊은 질문이에요. 이 질문이 왜 중요한지도 생각해 볼 수 있어요.",stems:["이 질문은 왜 중요할까?","먼저 답해야 할 질문은?"]},
+ cons:{say:"결과까지 내다본 깊은 질문이에요. 누구에게 어떤 결과인지 관점을 더하면 더 날카로워져요.",stems:["누구에게 좋은 결과일까?","반대편에게는 어떤 결과일까?"]},
+ meta:{say:"질문 자체를 따지는 가장 높은 질문이에요. 친구들이 답할 수 있게 쉬운 말로 다듬어 보세요.",stems:["더 쉬운 말로 바꾸면?"]}
+};
+const KEY="question-coach-v1";
+let S={name:"",topic:"착한 거짓말은 괜찮을까?",steps:[],pick:null};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+if(!S.steps.length&&!S.name){ // 처음 여는 화면은 예시가 보이게
+  S.example=true;S.name="예시";S.steps=[
+    {q:"착한 거짓말이 뭐야?",type:"clar",pick:"clar"},
+    {q:"착한 거짓말이 괜찮다고 왜 생각해?",type:"evid",pick:"clar"}];
+}
+function save(){try{const c=Object.assign({},S);if(c.example){return}localStorage.setItem(KEY,JSON.stringify(c))}catch(e){}}
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+
+function classify(q){
+  const s=q.replace(/\s+/g," ");
+  for(const [k,res] of RULES){if(res.some(r=>r.test(s)))return k}
+  return null;
+}
+function closedQ(q){return /(맞|아니|괜찮)(아|지|니|나요|죠|을까)?\s*\?*$/.test(q.trim())&&!/왜|어떻게|무엇|뭐/.test(q)}
+
+function drawPicks(){
+  $("picks").innerHTML=TYPES.map(t=>`<button class="pick" style="--c:var(${t.c})" data-k="${t.k}" aria-pressed="${S.pick===t.k}"><b>${t.e} ${t.n}</b></button>`).join("");
+  $("picks").querySelectorAll(".pick").forEach(b=>b.onclick=()=>{S.pick=b.dataset.k;drawPicks()});
+}
+function drawLadder(){
+  const best=Math.max(0,...S.steps.map(s=>T[s.type].lv));
+  document.querySelectorAll(".meter i").forEach((i,n)=>i.classList.toggle("f",n<best));
+  const ul=$("ladder");
+  if(!S.steps.length){ul.innerHTML=`<li class="note">아직 올린 질문이 없어요. 첫 질문을 써서 코치에게 보여 주세요.</li>`}
+  else ul.innerHTML=S.steps.map((s,i)=>{const t=T[s.type];return `<li class="rung on" style="--c:var(${t.c})"><span class="lv">${t.lv}층</span><div class="q">${esc(s.q)}<br><span class="chip" style="--c:var(${t.c})">${t.e} ${t.n}</span> <span class="note">${FLOOR[t.lv]}${s.pick&&s.pick!==s.type?` · 내 예상: ${T[s.pick].n}`:""}</span></div></li>`}).join("");
+  $("floorNote").textContent=best?`지금 ${best}층 · ${FLOOR[best]}`:"1층 사실 확인 → 2층 연결·설명 → 3층 전이·주장";
+  $("countNote").textContent=S.steps.length?`고쳐 쓴 질문 ${S.steps.length}개`:"";
+  const ready=best>=3||S.steps.length>=3;
+  $("submitBox").hidden=!ready||!S.steps.length;
+  if(ready&&S.steps.length){
+    const last=S.steps[S.steps.length-1];const clean=x=>String(x).replace(/[|\n]/g,"/").trim();
+    $("out").textContent=`⟦질문⟧ ${clean(S.name||"이름없음")} | ${last.type} | ${clean(last.q)} | ${S.steps.map(s=>s.type).join(">")}`;
+  }
+  if(S.example)$("msg").textContent="예시 학생의 사다리예요. 내 이름을 쓰고 '새 질문 시작'을 눌러 주세요.";
+}
+function coachCard(type,pick,q){
+  if(!type){return `<div class="coach"><p class="head">코치가 종류를 잘 모르겠어요.</p><p>질문에 '왜', '만약', '다른 사람이라면' 같은 말을 넣어 더 분명하게 써 볼까요?</p></div>`}
+  const t=T[type],h=HINT[type];
+  const agree=pick===type?`<p>내 예상도 <b>${t.n}</b>! 질문의 종류를 잘 알아봤어요.</p>`:pick?`<p>나는 <b>${T[pick].n}</b>(이)라고 예상했는데, 코치는 <b>${t.n}</b>(으)로 봤어요. 어느 쪽이 맞는지 짝과 이야기해 보세요.</p>`:"";
+  const closed=closedQ(q)?`<p class="note">이 질문은 '네/아니오'로 끝날 수 있어요. '왜'나 '어떻게'로 열어 주면 대화가 길어져요.</p>`:"";
+  const stems=NOHINT?"":`<div class="stems">${h.stems.map(s=>`<span class="stem" style="--c:var(${t.c})">${esc(s)}</span>`).join("")}</div>
+  <p class="note">말머리는 힌트예요. 그대로 붙이지 말고 내 질문과 이어지게 고쳐 써 보세요.</p>`;
+  return `<div class="coach" style="--c:var(${t.c})"><p class="head">${t.e} ${t.n} 질문 · ${t.lv}층 ${FLOOR[t.lv]}</p>${agree}<p>${h.say}</p>${closed}${stems}
+  <p class="note">코치의 판정은 참고용이에요. 몇 층인지는 나와 선생님이 정해요.</p></div>`;
+}
+$("checkBtn").onclick=()=>{
+  if(S.example){S={name:"",topic:S.topic,steps:[],pick:null};$("name").value="";}
+  S.name=$("name").value.trim();S.topic=$("topic").value.trim()||S.topic;
+  const q=$("q").value.trim();
+  if(!S.name){$("msg").textContent="먼저 내 이름을 써 주세요.";$("name").focus();return}
+  if(q.length<5){$("msg").textContent="질문을 조금 더 길게 써 주세요.";return}
+  if(S.steps.length&&S.steps[S.steps.length-1].q===q){$("msg").textContent="앞의 질문과 똑같아요. 힌트를 보고 고쳐 써 보세요.";return}
+  const type=classify(q);$("msg").textContent="";
+  $("coach").innerHTML=coachCard(type,S.pick,q);
+  if(type){S.steps.push({q,type,pick:S.pick});S.pick=null}
+  save();drawPicks();drawLadder();
+};
+$("copyBtn").onclick=()=>{
+  const t=$("out").textContent;
+  const ok=()=>$("copyNote").textContent="복사했어요. 게시판에 붙여 넣으세요.";
+  const fb=()=>{const r=document.createRange();r.selectNodeContents($("out"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("copyNote").textContent="글자가 선택됐어요. Ctrl+C로 복사하세요."};
+  try{navigator.clipboard.writeText(t).then(ok,fb)}catch(e){fb()}
+};
+// 워크시트 저장소(같은 포털 주소에서만 공유됨)에 발문과 층을 넣기
+let wsArmed=false;
+$("wsBtn").onclick=()=>{
+  const last=S.steps[S.steps.length-1];if(!last)return;
+  const note=$("wsNote");
+  if(S.example){note.textContent="지금은 예시 학생의 사다리예요. 내 질문을 만든 뒤 보내 주세요.";return}
+  try{
+    const raw=localStorage.getItem(WS_KEY);const d=raw?JSON.parse(raw):{};
+    const old=(d.prompt||"").trim();
+    if(old&&old!==last.q&&!wsArmed){wsArmed=true;$("wsBtn").textContent="덮어쓰기";
+      note.textContent=`워크시트에 쓰던 발문이 있어요: "${old.slice(0,40)}${old.length>40?"…":""}" 바꾸려면 한 번 더 누르세요.`;return}
+    d.prompt=last.q;d._rung=T[last.type].lv-1;if(S.name&&!d.name)d.name=S.name;
+    localStorage.setItem(WS_KEY,JSON.stringify(d));
+    wsArmed=false;$("wsBtn").textContent="워크시트로 보내기";
+    $("wsLink").href=WORKSHEET_URL;$("wsLink").hidden=false;
+    note.textContent=`보냈어요. 워크시트 ${T[last.type].lv}층(${FLOOR[T[last.type].lv]})에 발문이 들어가 있어요. 빛돌 포털에서 열 때만 이어집니다.`;
+  }catch(e){note.textContent="이 화면에서는 워크시트로 보낼 수 없어요. 위의 한 줄을 복사해 워크시트 발문 칸에 붙여 넣으세요."}
+};
+$("resetBtn").onclick=()=>{
+  S={name:S.example?"":S.name,topic:S.topic,steps:[],pick:null};$("q").value="";$("coach").innerHTML="";$("msg").textContent="";$("copyNote").textContent="";
+  $("name").value=S.name;save();drawPicks();drawLadder();
+};
+$("name").value=S.example?"":S.name;$("topic").value=S.topic;
+drawPicks();drawLadder();
+if(S.example)$("coach").innerHTML=coachCard("evid","clar","착한 거짓말이 괜찮다고 왜 생각해?");
+</script>
+</body>
+</html>

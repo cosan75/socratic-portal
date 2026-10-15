@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>질문 분류 카드</title>
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: 세 단계 탭(연습 → 내 질문 분류 → 바꿔 쓰기), 각 탭은 한 열 카드 목록 */
+:root{
+  --bg:#eef0ec;--panel:#f8f9f6;--ink:#1f2a2a;--muted:#5f6b69;--line:#c9cfc9;
+  --aegean:#1f5f8b;--aegean-soft:#d6e5ef;--olive:#6b7a3a;--used:#d9dcd6;--warn:#9a4a1f;--ochre:#b8862b;
+  --t1:#1f5f8b;--t2:#7a5c1e;--t3:#2f7a55;--t4:#6a4a8c;--t5:#2a7c8a;--t6:#9a3d4f;
+  --display:"Gowun Batang","Nanum Myeongjo",serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--used:#2a3233;--warn:#e19a6f;--ochre:#d9ac55;
+  --t1:#6fb0dc;--t2:#d4ae62;--t3:#6cc497;--t4:#b494d8;--t5:#62c2cf;--t6:#e08597;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--used:#2a3233;--warn:#e19a6f;--ochre:#d9ac55;
+  --t1:#6fb0dc;--t2:#d4ae62;--t3:#6cc497;--t4:#b494d8;--t5:#62c2cf;--t6:#e08597;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
+.wrap{max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.eyebrow{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+h1{font-family:var(--display);font-size:1.7rem;margin:0}
+h2{font-family:var(--display);font-size:1.1rem;margin:0}
+.note{font-size:.82rem;color:var(--muted)}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--aegean);outline-offset:2px}
+input[type=text],textarea{font:inherit;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);padding:8px;width:100%}
+.btn{border:1px solid var(--line);background:var(--bg);padding:7px 12px;border-radius:6px;font-size:.9rem}
+.btn.primary{background:var(--aegean);border-color:var(--aegean);color:var(--panel)}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+nav{display:flex;gap:4px;flex-wrap:wrap}
+.tab{border:1px solid var(--line);background:transparent;padding:6px 12px;border-radius:999px;font-size:.88rem}
+.tab[aria-selected="true"]{background:var(--aegean);color:var(--panel);border-color:var(--aegean)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:12px;min-width:0}
+.legend{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+@media (max-width:560px){.legend{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.legend div{border:1.5px solid var(--c);border-radius:8px;padding:6px 8px;font-size:.8rem}
+.legend b{color:var(--c);display:block;font-size:.9rem}
+.qcard{border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;background:var(--bg)}
+.qtext{font-family:var(--display);font-size:1.12rem;margin:0}
+.picks{display:flex;flex-wrap:wrap;gap:5px}
+.pk{border:1.5px solid var(--c);background:var(--panel);border-radius:999px;padding:3px 10px;font-size:.84rem}
+.pk b{color:var(--c);font-weight:600}
+.pk[aria-pressed="true"]{background:var(--c);color:var(--panel)}
+.pk[aria-pressed="true"] b{color:var(--panel)}
+.pk.right{box-shadow:0 0 0 2px var(--olive)}
+.oc{border:1.5px solid var(--line);background:var(--panel);border-radius:6px;padding:3px 12px;font-size:.86rem}
+.oc[aria-pressed="true"]{background:var(--ink);color:var(--panel);border-color:var(--ink)}
+.fb{font-size:.88rem;margin:0}
+.fb.ok{color:var(--olive)}
+.fb.no{color:var(--warn)}
+.score{font-family:var(--display);font-size:1.6rem;color:var(--aegean);font-variant-numeric:tabular-nums}
+.badge{font-size:.76rem;color:var(--muted)}
+.sample{font-size:.75rem;color:var(--olive);border:1px solid var(--olive);border-radius:4px;padding:1px 6px}
+.pair{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+@media (max-width:560px){.pair{grid-template-columns:1fr}}
+.out{font-family:ui-monospace,Consolas,monospace;font-size:.8rem;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px;white-space:pre-wrap;word-break:break-all;max-height:200px;overflow:auto;user-select:all}
+</style>
+
+<div class="wrap">
+  <header>
+    <div><span class="eyebrow">2차시 · 닫힌 질문과 열린 질문, 6가지 질문</span><h1>질문 분류 카드</h1></div>
+    <nav role="tablist">
+      <button class="tab" data-tab="quiz" aria-selected="true">① 연습</button>
+      <button class="tab" data-tab="mine" aria-selected="false">② 내 질문 분류</button>
+      <button class="tab" data-tab="flip" aria-selected="false">③ 바꿔 쓰기</button>
+    </nav>
+  </header>
+
+  <div class="legend" id="legend"></div>
+
+  <section class="panel" id="tab-quiz">
+    <div class="row" style="justify-content:space-between">
+      <h2>이 질문은 어떤 카드일까?</h2>
+      <span><span class="score" id="score">0</span> <span class="note" id="scoreOf"></span></span>
+    </div>
+    <div id="quiz" style="display:flex;flex-direction:column;gap:10px"></div>
+    <button class="btn" id="quizReset">다시 풀기</button>
+  </section>
+
+  <section class="panel" id="tab-mine" hidden>
+    <div class="row" style="justify-content:space-between">
+      <h2>1차시에 쏟아낸 내 질문</h2>
+      <span id="srcTag"></span>
+    </div>
+    <p class="note" style="margin:0">먼저 닫힌 질문(네/아니오나 한 낱말로 끝남)인지 열린 질문인지 고르고, 열린 질문에는 카드를 붙여요. 코치 의견은 참고만 해요.</p>
+    <details>
+      <summary class="note">질문 목록 붙여 넣기 (질문 폭풍에서 복사한 목록)</summary>
+      <textarea id="paste" rows="5" placeholder="1. 착한 거짓말은 누가 정할까?"></textarea>
+      <button class="btn" id="pasteBtn" style="margin-top:6px">불러오기</button>
+    </details>
+    <div id="mine" style="display:flex;flex-direction:column;gap:10px"></div>
+    <details>
+      <summary class="note">서클 보드 질문함으로 보낼 줄 만들기 (카드를 붙인 질문만)</summary>
+      <div class="out" id="out"></div>
+      <div class="row" style="margin-top:6px"><button class="btn" id="copyBtn">복사</button><span class="note" id="copyNote"></span></div>
+    </details>
+  </section>
+
+  <section class="panel" id="tab-flip" hidden>
+    <h2>닫힌 ↔ 열린 바꿔 쓰기</h2>
+    <p class="note" style="margin:0">닫힌 질문은 정확한 사실을 알 때 좋고, 열린 질문은 생각을 넓힐 때 좋아요. 하나씩 바꿔 써 보세요.</p>
+    <div class="pair">
+      <div class="qcard"><span class="note">닫힌 질문 하나 고르기</span><p class="qtext" id="closedPick">②에서 닫힌 질문을 하나 표시해 주세요.</p>
+        <label class="note" for="toOpen">→ 열린 질문으로</label><textarea id="toOpen" rows="2" placeholder="예) 거짓말이 다 나쁘다고 생각하는 까닭은 뭘까?"></textarea></div>
+      <div class="qcard"><span class="note">열린 질문 하나 고르기</span><p class="qtext" id="openPick">②에서 열린 질문을 하나 표시해 주세요.</p>
+        <label class="note" for="toClosed">→ 닫힌 질문으로</label><textarea id="toClosed" rows="2" placeholder="예) 오늘 착한 거짓말을 한 적이 있니?"></textarea></div>
+    </div>
+    <label class="note" for="reflect">바꿔 써 보니 무엇이 달라졌나요?</label>
+    <textarea id="reflect" rows="2"></textarea>
+  </section>
+</div>
+
+<script>
+const TYPES=[
+ {k:"clar",e:"🔍",n:"명료화",lv:1,c:"--t1",d:"뜻·예시를 묻기"},
+ {k:"evid",e:"📎",n:"이유·증거",lv:2,c:"--t3",d:"왜? 어떻게 알아?"},
+ {k:"assm",e:"🧱",n:"가정",lv:2,c:"--t2",d:"당연하게 여긴 것 묻기"},
+ {k:"view",e:"👓",n:"관점",lv:3,c:"--t4",d:"다른 사람의 눈으로"},
+ {k:"cons",e:"🌊",n:"결과",lv:3,c:"--t5",d:"그러면 어떻게 될까?"},
+ {k:"meta",e:"❓",n:"질문의 질문",lv:3,c:"--t6",d:"질문 자체를 따지기"}
+];
+const T=Object.fromEntries(TYPES.map(t=>[t.k,t]));
+const FLOOR={1:"사실 확인",2:"연결·설명",3:"전이·주장"};
+const RULES=[
+ ["meta",[/이\s*질문/,/질문이\s*왜/,/먼저\s*(답|알아)/,/무엇을\s*물/,/어떤\s*질문/,/질문\s*자체/]],
+ ["cons",[/만약/,/모두가/,/모든\s*사람이/,/다들/,/그러면\s*어떻게/,/어떻게\s*될/,/결과/,/앞으로/,/계속\s*하면/,/나중에/,/영향/]],
+ ["view",[/다른\s*사람/,/반대/,/입장/,/상대/,/관점/,/다르게\s*(볼|생각)/,/(이|가)라면\s*어떻게\s*생각/,/의\s*마음/,/기분/]],
+ ["assm",[/당연/,/항상/,/언제나/,/꼭\s/,/반드시/,/원래/,/전제/,/가정/,/모든\s*경우/,/무조건/]],
+ ["evid",[/왜/,/근거/,/어떻게\s*알/,/증거/,/이유/,/확실/,/믿을\s*수/,/어떻게\s*확인/]],
+ ["clar",[/뜻/,/의미/,/예를\s*들/,/무슨\s*말/,/정확히/,/무엇/,/뭐야/,/뭘까/,/란\s*뭐/,/이란/]]
+];
+function classify(q){const s=q.replace(/\s+/g," ");for(const [k,res] of RULES){if(res.some(r=>r.test(s)))return k}return null}
+const QUIZ=[
+ ["‘착한 거짓말’이 정확히 무슨 뜻이야?","clar","말의 뜻을 분명히 하려는 질문이에요."],
+ ["예를 들면 어떤 때가 착한 거짓말이야?","clar","예시를 달라는 것도 뜻을 분명히 하는 질문이에요."],
+ ["착한 거짓말이 괜찮다고 왜 생각해?","evid","생각의 까닭을 묻고 있어요."],
+ ["상대가 기뻐했다는 걸 어떻게 알 수 있어?","evid","근거를 확인하는 질문이에요."],
+ ["거짓말이 들키지 않는다고 당연하게 생각한 거 아니야?","assm","숨어 있는 전제를 꺼내는 질문이에요."],
+ ["착한 거짓말은 언제나 상대를 위한 걸까?","assm","‘언제나’라는 전제를 의심하고 있어요."],
+ ["거짓말을 들은 친구 입장이라면 어떨까?","view","다른 사람의 자리에 서 보는 질문이에요."],
+ ["어른들은 착한 거짓말을 다르게 볼까?","view","다른 관점을 불러오는 질문이에요."],
+ ["모두가 착한 거짓말을 하면 어떻게 될까?","cons","모두가 그렇게 했을 때의 결과를 묻고 있어요."],
+ ["착한 거짓말을 계속하면 우정은 어떻게 될까?","cons","앞으로 생길 일을 내다보는 질문이에요."],
+ ["이 질문은 왜 중요할까?","meta","질문 자체를 따져 보는 질문이에요."],
+ ["이 질문에 답하려면 무엇부터 알아야 할까?","meta","먼저 답해야 할 질문을 찾는 질문이에요."]
+];
+const KEY="question-sort-v1";
+let S={quiz:{},mine:[],flip:{}};
+try{const r=localStorage.getItem(KEY);if(r)S=Object.assign(S,JSON.parse(r))}catch(e){}
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+$("legend").innerHTML=TYPES.map(t=>`<div style="--c:var(${t.c})"><b>${t.e} ${t.n}</b>${t.d} · ${t.lv}층</div>`).join("");
+
+// ① 연습
+function drawQuiz(){
+  let ok=0,done=0;
+  $("quiz").innerHTML=QUIZ.map(([q,ans,why],i)=>{const a=S.quiz[i];if(a){done++;if(a===ans)ok++}
+    return `<div class="qcard"><p class="qtext">${i+1}. ${esc(q)}</p><div class="picks">${TYPES.map(t=>`<button class="pk ${a&&t.k===ans?"right":""}" style="--c:var(${t.c})" data-i="${i}" data-k="${t.k}" aria-pressed="${a===t.k}"><b>${t.e}</b> ${t.n}</button>`).join("")}</div>
+    ${a?`<p class="fb ${a===ans?"ok":"no"}">${a===ans?"맞았어요!":`정답은 ${T[ans].e} ${T[ans].n}.`} ${why}</p>`:""}</div>`}).join("");
+  $("score").textContent=ok;$("scoreOf").textContent=`/ ${QUIZ.length} · ${done}문제 풂`;
+  $("quiz").querySelectorAll(".pk").forEach(b=>b.onclick=()=>{S.quiz[b.dataset.i]=b.dataset.k;save();drawQuiz()});
+}
+$("quizReset").onclick=()=>{S.quiz={};save();drawQuiz()};
+
+// ② 내 질문
+let fromStorm=false;
+function loadStorm(){
+  if(S.mine.length&&!S.example)return;
+  S.example=false;S.mine=[];
+  try{const st=JSON.parse(localStorage.getItem("question-storm-v1")||"{}");
+    if(st.qs&&st.qs.length){S.mine=st.qs.map(q=>({t:q.t}));S.name=st.name||"";fromStorm=true;save();return}}catch(e){}
+  S.example=true;S.mine=[{t:"착한 거짓말은 누가 정할까?",oc:"open",k:"view"},{t:"거짓말은 다 나쁜 거야?",oc:"closed"},{t:"착한 거짓말이 들키면 어떻게 될까?"}];
+}
+function drawMine(){
+  $("srcTag").innerHTML=S.example?'<span class="sample">예시 질문</span>':fromStorm?'<span class="note">질문 폭풍에서 불러옴</span>':"";
+  $("mine").innerHTML=S.mine.map((q,i)=>{const auto=classify(q.t);
+    return `<div class="qcard"><p class="qtext">${esc(q.t)}</p>
+    <div class="row"><button class="oc" data-i="${i}" data-oc="closed" aria-pressed="${q.oc==="closed"}">닫힌 질문</button><button class="oc" data-i="${i}" data-oc="open" aria-pressed="${q.oc==="open"}">열린 질문</button></div>
+    ${q.oc==="open"?`<div class="picks">${TYPES.map(t=>`<button class="pk" style="--c:var(${t.c})" data-i="${i}" data-k="${t.k}" aria-pressed="${q.k===t.k}"><b>${t.e}</b> ${t.n}</button>`).join("")}</div>
+    <span class="badge">${q.k?`${T[q.k].lv}층 ${FLOOR[T[q.k].lv]}`:""}${auto&&q.k&&auto!==q.k?` · 코치 의견: ${T[auto].e} ${T[auto].n}`:""}${auto&&!q.k?`코치 의견: ${T[auto].e} ${T[auto].n}`:""}</span>`:""}</div>`}).join("");
+  $("mine").querySelectorAll(".oc").forEach(b=>b.onclick=()=>{edit();const q=S.mine[+b.dataset.i];q.oc=b.dataset.oc;if(q.oc==="closed")delete q.k;save();drawAll()});
+  $("mine").querySelectorAll(".pk").forEach(b=>b.onclick=()=>{edit();S.mine[+b.dataset.i].k=b.dataset.k;save();drawAll()});
+  const clean=x=>String(x).replace(/[|\n]/g,"/").trim();
+  const lines=S.mine.filter(q=>q.k).map(q=>`⟦질문⟧ ${clean(S.name||"이름없음")} | ${q.k} | ${clean(q.t)} | ${q.k}`);
+  $("out").textContent=lines.length?lines.join("\n"):"아직 카드를 붙인 열린 질문이 없어요.";
+}
+function edit(){if(S.example){S.example=false}}
+$("pasteBtn").onclick=()=>{
+  const lines=$("paste").value.split("\n").map(l=>l.replace(/^\s*\d+[.)]\s*/,"").trim()).filter(l=>l&&!/^(이름|초점)\s*:/.test(l));
+  const nm=($("paste").value.match(/이름:\s*(.+)/)||[])[1];if(nm)S.name=nm.trim();
+  if(lines.length){S.example=false;S.mine=lines.map(t=>({t}));fromStorm=false;save();drawAll()}
+};
+
+// ③ 바꿔 쓰기
+function drawFlip(){
+  const c=S.mine.find(q=>q.oc==="closed"),o=S.mine.find(q=>q.oc==="open");
+  $("closedPick").textContent=c?c.t:"②에서 닫힌 질문을 하나 표시해 주세요.";
+  $("openPick").textContent=o?o.t:"②에서 열린 질문을 하나 표시해 주세요.";
+}
+["toOpen","toClosed","reflect"].forEach(id=>{$(id).value=S.flip[id]||"";$(id).oninput=()=>{S.flip[id]=$(id).value;save()}});
+
+function drawAll(){drawQuiz();drawMine();drawFlip()}
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.setAttribute("aria-selected",x===b));
+  ["quiz","mine","flip"].forEach(k=>$("tab-"+k).hidden=k!==b.dataset.tab);
+});
+$("copyBtn").onclick=()=>{const t=$("out").textContent;const ok=()=>$("copyNote").textContent="복사했어요.";
+  const fb=()=>{const r=document.createRange();r.selectNodeContents($("out"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("copyNote").textContent="선택됐어요. Ctrl+C로 복사하세요."};
+  try{navigator.clipboard.writeText(t).then(ok,fb)}catch(e){fb()}};
+loadStorm();drawAll();
+</script>
+</body>
+</html>

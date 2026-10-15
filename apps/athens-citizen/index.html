@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>아테네 시민 챌린지</title>
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: 위에 시민의 주장과 확신 게이지(무대), 아래에 내 질문 쓰기 + 대화 기록. 넓으면 대화 기록이 오른쪽 */
+:root{
+  --bg:#eef0ec;--panel:#f8f9f6;--ink:#1f2a2a;--muted:#5f6b69;--line:#c9cfc9;
+  --aegean:#1f5f8b;--aegean-soft:#d6e5ef;--olive:#6b7a3a;--used:#d9dcd6;--warn:#9a4a1f;--ochre:#b8862b;
+  --t1:#1f5f8b;--t2:#7a5c1e;--t3:#2f7a55;--t4:#6a4a8c;--t5:#2a7c8a;--t6:#9a3d4f;
+  --display:"Gowun Batang","Nanum Myeongjo",serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--used:#2a3233;--warn:#e19a6f;--ochre:#d9ac55;
+  --t1:#6fb0dc;--t2:#d4ae62;--t3:#6cc497;--t4:#b494d8;--t5:#62c2cf;--t6:#e08597;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--used:#2a3233;--warn:#e19a6f;--ochre:#d9ac55;
+  --t1:#6fb0dc;--t2:#d4ae62;--t3:#6cc497;--t4:#b494d8;--t5:#62c2cf;--t6:#e08597;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
+.wrap{max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.eyebrow{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+h1{font-family:var(--display);font-size:1.7rem;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-size:1.1rem;margin:0}
+.note{font-size:.82rem;color:var(--muted)}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--aegean);outline-offset:2px}
+select,input[type=text],textarea{font:inherit;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);padding:8px;max-width:100%}
+header>div{min-width:0}
+textarea{width:100%;resize:vertical}
+.btn{border:1px solid var(--line);background:var(--bg);padding:8px 14px;border-radius:6px;font-size:.92rem}
+.btn.primary{background:var(--aegean);border-color:var(--aegean);color:var(--panel)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+
+/* 무대: 시민 */
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:18px;align-items:center}
+@media (max-width:560px){.stage{grid-template-columns:1fr}}
+.bust{width:120px;height:140px}
+.speech{display:flex;flex-direction:column;gap:8px;min-width:0}
+.who{font-size:.8rem;color:var(--muted)}
+.claim{font-family:var(--display);font-size:1.35rem;line-height:1.45;margin:0;text-wrap:balance}
+.reply{font-family:var(--display);font-size:1.08rem;margin:0;padding:10px 14px;border-left:3px solid var(--ochre);background:var(--bg);border-radius:0 8px 8px 0}
+.gauge{display:flex;flex-direction:column;gap:4px}
+.gauge .bar{height:12px;border-radius:6px;background:var(--used);overflow:hidden}
+.gauge .fill{height:100%;background:var(--ochre);transition:width .5s ease}
+.gauge .lbl{display:flex;justify-content:space-between;font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.grid{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:16px}
+@media (max-width:820px){.grid{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0;display:flex;flex-direction:column;gap:12px}
+label{font-size:.82rem;color:var(--muted);display:block;margin-bottom:4px}
+.picks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+@media (max-width:480px){.picks{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.pick{border:1.5px solid var(--c);background:var(--panel);border-radius:8px;padding:6px 8px;text-align:left;font-size:.88rem;display:flex;flex-direction:column}
+.pick b{color:var(--c)}
+.pick small{font-size:.72rem;color:var(--muted)}
+.pick[aria-pressed="true"]{background:var(--c);color:var(--panel)}
+.pick[aria-pressed="true"] b,.pick[aria-pressed="true"] small{color:var(--panel)}
+.pick.spent{border-style:dashed;opacity:.55}
+.msg{font-size:.88rem;color:var(--warn);min-height:1.3em;margin:0}
+.log{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px;max-height:460px;overflow:auto}
+.log li{display:flex;flex-direction:column;gap:3px;border-bottom:1px dashed var(--line);padding-bottom:8px;font-size:.9rem}
+.log .me{font-weight:600}
+.log .them{font-family:var(--display);color:var(--ink)}
+.chip{font-size:.72rem;padding:1px 8px;border-radius:999px;border:1px solid var(--c);color:var(--c);white-space:nowrap}
+.win{border:1.5px solid var(--olive);border-radius:10px;padding:14px;background:var(--bg);display:flex;flex-direction:column;gap:8px}
+.win h2{color:var(--olive)}
+.out{font-family:ui-monospace,Consolas,monospace;font-size:.8rem;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:10px;word-break:break-all;user-select:all}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <span class="eyebrow">소크라테스 질문으로 확신 흔들기</span>
+      <h1>아테네 시민 챌린지</h1>
+    </div>
+    <div class="row">
+      <label for="name" style="margin:0">내 이름</label>
+      <input type="text" id="name" maxlength="12" style="width:7em">
+      <label for="scenario" style="margin:0">주장 고르기</label>
+      <select id="scenario"></select>
+    </div>
+  </header>
+
+  <section class="stage" aria-live="polite">
+    <svg class="bust" viewBox="0 0 120 140" role="img" aria-label="자신만만한 아테네 시민">
+      <rect x="18" y="122" width="84" height="14" rx="2" fill="var(--line)"/>
+      <rect x="30" y="112" width="60" height="12" rx="2" fill="var(--used)"/>
+      <path d="M22 112 Q60 70 98 112 Z" fill="var(--aegean-soft)" stroke="var(--aegean)" stroke-width="1.5"/>
+      <ellipse cx="60" cy="56" rx="26" ry="31" fill="var(--panel)" stroke="var(--ink)" stroke-width="1.5"/>
+      <path d="M36 46 Q60 14 84 46" fill="none" stroke="var(--olive)" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="44" cy="34" r="3.5" fill="var(--olive)"/><circle cx="76" cy="34" r="3.5" fill="var(--olive)"/><circle cx="60" cy="26" r="3.5" fill="var(--olive)"/>
+      <g id="face"></g>
+    </svg>
+    <div class="speech">
+      <span class="who" id="whoLine"></span>
+      <p class="claim" id="claim"></p>
+      <p class="reply" id="reply"></p>
+      <div class="gauge">
+        <div class="lbl"><span>시민의 확신</span><span id="confText"></span></div>
+        <div class="bar"><div class="fill" id="confFill"></div></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <section class="panel">
+      <h2>내 질문 던지기</h2>
+      <div>
+        <label for="q">시민의 주장을 흔들 질문을 직접 써 보세요</label>
+        <textarea id="q" rows="3" placeholder="예) 언제나 괜찮다는 걸 어떻게 알 수 있어요?"></textarea>
+      </div>
+      <div>
+        <label>어떤 종류의 질문인가요? 카드를 골라요</label>
+        <div class="picks" id="picks"></div>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="askBtn">질문하기</button>
+        <button class="btn" id="resetBtn">처음부터</button>
+        <span class="note" id="turnNote"></span>
+      </div>
+      <p class="msg" id="msg"></p>
+      <div class="win" id="win" hidden>
+        <h2>시민이 말했어요. "내가 모른다는 걸 이제 알겠소."</h2>
+        <p style="margin:0" id="winText"></p>
+        <label for="reflect">성찰: 시민의 확신을 가장 크게 흔든 내 질문은 무엇이었고, 왜일까요?</label>
+        <textarea id="reflect" rows="2"></textarea>
+        <div class="out" id="out"></div>
+        <div class="row"><button class="btn primary" id="copyBtn">기록 복사하기</button><span class="note" id="copyNote"></span></div>
+      </div>
+      <p class="note">이 시민은 AI가 아니라 선생님이 미리 써 둔 대본으로 대답해요. 그래도 AI처럼 자신만만하게 말하죠. 말투가 확신에 차 있다고 해서 맞는 말은 아니라는 걸 질문으로 확인해 보세요.</p>
+    </section>
+
+    <section class="panel">
+      <div class="row" style="justify-content:space-between"><h2>대화 기록</h2><span class="note" id="kinds"></span></div>
+      <ul class="log" id="log"></ul>
+    </section>
+  </div>
+</div>
+
+<script>
+const TYPES=[
+ {k:"clar",e:"🔍",n:"명료화",lv:1,c:"--t1",hit:12},
+ {k:"evid",e:"📎",n:"이유·증거",lv:2,c:"--t3",hit:16},
+ {k:"assm",e:"🧱",n:"가정",lv:2,c:"--t2",hit:18},
+ {k:"view",e:"👓",n:"관점",lv:3,c:"--t4",hit:20},
+ {k:"cons",e:"🌊",n:"결과",lv:3,c:"--t5",hit:20},
+ {k:"meta",e:"❓",n:"질문의 질문",lv:3,c:"--t6",hit:16}
+];
+const T=Object.fromEntries(TYPES.map(t=>[t.k,t]));
+const FLOOR={1:"사실 확인",2:"연결·설명",3:"전이·주장"};
+// 질문 사다리 코치와 같은 키워드 규칙
+const RULES=[
+ ["meta",[/이\s*질문/,/질문이\s*왜/,/먼저\s*(답|알아)/,/무엇을\s*물/,/어떤\s*질문/,/질문\s*자체/]],
+ ["cons",[/만약/,/모두가/,/모든\s*사람이/,/다들/,/그러면\s*어떻게/,/어떻게\s*될/,/결과/,/앞으로/,/계속\s*하면/,/나중에/,/영향/]],
+ ["view",[/다른\s*사람/,/반대/,/입장/,/상대/,/관점/,/다르게\s*(볼|생각)/,/(이|가)라면\s*어떻게\s*생각/,/의\s*마음/,/기분/]],
+ ["assm",[/당연/,/항상/,/언제나/,/꼭\s/,/반드시/,/원래/,/전제/,/가정/,/모든\s*경우/,/무조건/]],
+ ["evid",[/왜/,/근거/,/어떻게\s*알/,/증거/,/이유/,/확실/,/믿을\s*수/,/어떻게\s*확인/]],
+ ["clar",[/뜻/,/의미/,/예를\s*들/,/무슨\s*말/,/정확히/,/무엇/,/뭐야/,/뭘까/,/란\s*뭐/,/이란/]]
+];
+function classify(q){const s=q.replace(/\s+/g," ");for(const [k,res] of RULES){if(res.some(r=>r.test(s)))return k}return null}
+
+// 시민 대본: 주장 + 질문 유형별 대답(첫 대답은 버티고, 두 번째부터 흔들림)
+const SCEN=[
+ {id:"lie",subj:"도덕",name:"데모스",claim:"착한 거짓말은 언제나 괜찮습니다. 상대방의 기분을 지켜 주니까요.",
+  R:{clar:["착한 거짓말이란 상대가 기분 좋으라고 하는 거짓말이지요. 예를 들면 맛없는 음식을 맛있다고 하는 것.","음… 깜짝 파티를 숨기는 것도, 아픈 사람에게 괜찮다고 하는 것도 착한 거짓말인가? 생각보다 종류가 많군요."],
+     evid:["기분이 좋아지니까 괜찮은 거지요. 다들 그렇게 합니다.","다들 한다는 게 근거가 될까… 기분이 좋아졌는지 확인해 본 적은 없군요."],
+     assm:["거짓말이 들키지 않는다면 아무 문제가 없지요.","잠깐, 나는 들키지 않는다는 걸 당연하게 여기고 있었군요. 들키면 어떻게 되지?"],
+     view:["상대도 분명 고마워할 겁니다.","거짓말을 들은 사람이 나중에 알게 되면… 속았다고 느낄 수도 있겠군요."],
+     cons:["모두가 착한 거짓말을 하면 세상이 더 친절해지지요.","모두가 그러면 칭찬을 들어도 진짜인지 모르게 되겠군요. 그건 친절한 세상일까?"],
+     meta:["그런 질문은 쓸모없어요. 답은 이미 정해져 있으니까.","이 질문이 왜 중요한지 물으니… 나는 '언제나'라는 말을 너무 쉽게 썼군요."]}},
+ {id:"ai",subj:"AI 윤리",name:"알고리타",claim:"AI가 한 말은 믿어도 됩니다. 수많은 자료로 배웠으니 틀릴 리가 없지요.",
+  R:{clar:["믿는다는 건 따로 확인하지 않고 그대로 받아들인다는 뜻이지요.","그대로 받아들인다… 계산 결과와 의견과 사실을 모두 똑같이 믿어도 되는 걸까?"],
+     evid:["자료가 많으면 정확해집니다. 당연하지요.","그런데 그 자료 속에 틀린 말도 섞여 있다면? 자료가 많다는 것만으로는 부족하군요."],
+     assm:["AI는 모르는 것을 모른다고 말하니까요.","정말 그랬던가… 모르는 것도 아는 것처럼 매끄럽게 말할 때가 있었던 것 같군요."],
+     view:["선생님들도 다들 AI를 씁니다.","AI를 만든 사람들도 '틀릴 수 있다'고 적어 둔다던데… 그들의 눈으로 보면 다르겠군요."],
+     cons:["모두가 AI 말만 믿으면 공부할 시간이 줄어 좋지요.","모두가 확인 없이 믿다가 AI가 틀리면, 아무도 틀린 걸 알아채지 못하겠군요."],
+     meta:["그런 걸 왜 묻나요? AI는 똑똑합니다.","'믿어도 될까'보다 '언제, 어떻게 확인해야 할까'가 더 좋은 질문일지도 모르겠군요."]}},
+ {id:"fair",subj:"사회",name:"이소노미아",claim:"공정하다는 건 모두에게 똑같이 나누는 것입니다. 그것 말고는 없어요.",
+  R:{clar:["똑같이란 사람 수대로 같은 양을 준다는 뜻이지요.","같은 양… 시간도, 기회도, 도움도 다 같은 양이어야 하나요? 생각보다 복잡하군요."],
+     evid:["똑같이 나누면 아무도 불평하지 않으니까요.","불평하지 않는다는 걸 어떻게 아냐고요? 목소리가 작은 사람은 말을 안 했을 수도 있겠군요."],
+     assm:["사람들은 모두 필요한 것이 같으니까요.","필요가 같다고 내가 미리 정해 버렸군요. 키가 다른 아이들에게 같은 높이 받침대라면?"],
+     view:["모두가 같은 걸 받으면 다 만족합니다.","다리를 다친 친구의 입장이라면 똑같은 계단이 공정하게 느껴질까요… 아니겠군요."],
+     cons:["언제나 똑같이 나누면 다툼이 사라지지요.","더 필요한 사람에게 늘 부족하다면 결국 더 큰 다툼이 생기겠군요."],
+     meta:["질문할 필요 없어요. 똑같은 게 공정이니까.","'똑같은 것'과 '공정한 것'이 같은 말인지부터 물었어야 했군요."]}},
+ {id:"shadow",subj:"과학",name:"스키아",claim:"그림자는 언제나 물체 바로 아래에 생깁니다. 그래서 그림자 방향은 늘 똑같지요.",
+  R:{clar:["그림자란 물체 뒤에 생기는 어두운 부분이지요.","'뒤'라는 게 어느 쪽 뒤일까요? 빛이 오는 쪽에 따라 뒤가 달라지겠군요."],
+     evid:["운동장에서 보면 늘 발밑에 있었으니까요.","점심때만 봐서 그랬나… 아침이나 저녁에는 길게 늘어졌던 것도 같군요."],
+     assm:["해는 늘 머리 바로 위에 있으니까요.","해가 늘 머리 위에 있다고 당연하게 생각했군요. 해는 움직이지 않던가?"],
+     view:["가로등 아래에서도 똑같았어요.","가로등과 해는 빛이 오는 방향과 거리가 다르겠군요. 다른 빛으로 보면 다르겠어요."],
+     cons:["방향이 늘 같다면 그림자로 시간을 알 수는 없겠군요.","그런데 옛날 사람들은 해시계를 썼다던데… 그럼 방향이 바뀐다는 뜻이군요."],
+     meta:["그림자는 당연한 거라 질문할 게 없어요.","'그림자가 어디 생기나'보다 '무엇이 그림자 방향을 정하나'가 더 좋은 질문이겠군요."]}}
+];
+const KEY="athens-citizen-v1";
+let st={sc:"lie",conf:100,turns:[],pick:null};
+try{const r=localStorage.getItem(KEY);if(r)st=Object.assign(st,JSON.parse(r))}catch(e){}
+if(!st.turns.length&&st.conf===100&&!st.started){ // 처음 화면: 두 번의 예시 대화
+  st.example=true;
+  st.turns=[{q:"착한 거짓말이 정확히 무슨 뜻이에요?",type:"clar",reply:SCEN[0].R.clar[0]},
+            {q:"그게 괜찮다는 걸 어떻게 알 수 있어요?",type:"evid",reply:SCEN[0].R.evid[0]}];
+  st.conf=100-T.clar.hit*0.4-T.evid.hit*0.4;
+}
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function save(){if(st.example)return;try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+const sc=()=>SCEN.find(s=>s.id===st.sc)||SCEN[0];
+
+function face(conf){
+  // 확신이 클수록 눈썹이 올라가고 입꼬리가 올라감
+  const up=conf>60,mid=conf>25;
+  return `<path d="M44 ${up?44:48} l10 ${up?-3:2}" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/>
+  <path d="M76 ${up?44:48} l-10 ${up?-3:2}" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/>
+  <circle cx="50" cy="54" r="2.2" fill="var(--ink)"/><circle cx="70" cy="54" r="2.2" fill="var(--ink)"/>
+  ${up?`<path d="M48 70 Q60 78 72 70" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/>`
+     :mid?`<path d="M50 72 L70 72" stroke="var(--ink)" stroke-width="2" stroke-linecap="round"/>`
+     :`<ellipse cx="60" cy="73" rx="5" ry="6" fill="none" stroke="var(--ink)" stroke-width="2"/>`}`;
+}
+function drawPicks(){
+  const used=new Set(st.turns.map(t=>t.type));
+  $("picks").innerHTML=TYPES.map(t=>`<button class="pick ${used.has(t.k)?"spent":""}" style="--c:var(${t.c})" data-k="${t.k}" aria-pressed="${st.pick===t.k}"><b>${t.e} ${t.n}</b><small>${t.lv}층 ${FLOOR[t.lv]}${used.has(t.k)?" · 써 봤어요":""}</small></button>`).join("");
+  $("picks").querySelectorAll(".pick").forEach(b=>b.onclick=()=>{st.pick=b.dataset.k;drawPicks()});
+}
+function render(){
+  const s=sc();const conf=Math.max(0,Math.round(st.conf));
+  $("scenario").value=s.id;
+  $("whoLine").textContent=`아테네 시민 ${s.name} · ${s.subj}`;
+  $("claim").textContent=`"${s.claim}"`;
+  const last=st.turns[st.turns.length-1];
+  $("reply").textContent=last?last.reply:"자, 무엇이든 물어보시오. 나는 틀린 적이 없으니까.";
+  $("confText").textContent=`${conf}%`;$("confFill").style.width=conf+"%";
+  $("face").innerHTML=face(conf);
+  $("log").innerHTML=st.turns.length?st.turns.map((t,i)=>{const ty=T[t.type];return `<li><span class="me">${i+1}. ${esc(t.q)} <span class="chip" style="--c:var(${ty.c})">${ty.e} ${ty.n}</span></span><span class="them">${esc(s.name)}: ${esc(t.reply)}</span></li>`}).join("")
+    :`<li class="note">아직 대화가 없어요. 시민에게 첫 질문을 던져 보세요.</li>`;
+  const kinds=new Set(st.turns.map(t=>t.type)).size;
+  $("kinds").textContent=`질문 ${st.turns.length}개 · 카드 ${kinds}종`;
+  $("turnNote").textContent=st.example?"예시 대화예요. '처음부터'를 누르고 시작하세요.":"";
+  const won=conf<=20;$("win").hidden=!won;$("askBtn").disabled=won||st.example;
+  if(won){
+    const best=st.turns.reduce((a,t)=>T[t.type].lv>T[a.type].lv?t:a,st.turns[0]);
+    $("winText").textContent=`질문 ${st.turns.length}번, 카드 ${kinds}종으로 시민의 확신을 ${conf}%까지 낮췄어요. 가장 높은 층의 질문은 ${T[best.type].lv}층 ${FLOOR[T[best.type].lv]} 질문이었어요.`;
+    updateOut();
+  }
+  drawPicks();
+}
+function updateOut(){
+  const clean=x=>String(x).replace(/[|\n]/g,"/").trim();
+  const best=st.turns.reduce((a,t)=>T[t.type].lv>=T[a.type].lv?t:a,st.turns[0]);
+  $("out").textContent=`⟦질문⟧ ${clean(st.name||"이름없음")} | ${best.type} | ${clean(best.q)} | ${st.turns.map(t=>t.type).join(">")}`+(($("reflect").value||"").trim()?`\n성찰: ${clean($("reflect").value)}`:"");
+}
+$("askBtn").onclick=()=>{
+  const q=$("q").value.trim();const m=$("msg");
+  if(q.length<5){m.textContent="질문을 조금 더 길게 써 주세요.";return}
+  if(!st.pick){m.textContent="질문 카드를 하나 골라 주세요.";return}
+  if(!/[?？]|까|니|요$|나요|어$|야$/.test(q)){m.textContent="주장 말고 질문으로 써 볼까요? 끝을 물음표로 바꿔 보세요.";return}
+  const auto=classify(q);
+  m.textContent=auto&&auto!==st.pick?`코치가 보기엔 ${T[auto].e} ${T[auto].n} 질문 같아요. 카드는 내가 고른 대로 갈게요.`:"";
+  const s=sc();const n=st.turns.filter(t=>t.type===st.pick).length;
+  let reply,drop;
+  if(n>=2){reply="그건 이미 대답했잖소. 다른 종류의 질문은 없소?";drop=2}
+  else{reply=s.R[st.pick][n];drop=T[st.pick].hit*(n===0?0.6:1.1)}
+  st.started=true;st.turns.push({q,type:st.pick,reply});st.conf-=drop;st.pick=null;
+  $("q").value="";save();render();
+};
+$("resetBtn").onclick=()=>{st={sc:st.sc,name:st.name,conf:100,turns:[],pick:null,started:true};$("msg").textContent="";$("reflect").value="";save();render()};
+$("scenario").innerHTML=SCEN.map(s=>`<option value="${s.id}">${s.subj} · ${s.claim.split(".")[0]}</option>`).join("");
+$("scenario").onchange=e=>{st={sc:e.target.value,name:st.name,conf:100,turns:[],pick:null,started:true};$("msg").textContent="";save();render()};
+$("reflect").oninput=updateOut;
+$("copyBtn").onclick=()=>{
+  const t=$("out").textContent;const ok=()=>$("copyNote").textContent="복사했어요. 학급 게시판에 붙여 넣으세요.";
+  const fb=()=>{const r=document.createRange();r.selectNodeContents($("out"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("copyNote").textContent="글자가 선택됐어요. Ctrl+C로 복사하세요."};
+  try{navigator.clipboard.writeText(t).then(ok,fb)}catch(e){fb()}
+};
+// 이름: 질문 사다리 코치에 쓴 이름이 있으면 가져옴(같은 포털 주소일 때)
+try{const c=JSON.parse(localStorage.getItem("question-coach-v1")||"{}");if(c.name&&!st.name)st.name=c.name}catch(e){}
+$("name").value=st.name||"";
+$("name").oninput=()=>{st.name=$("name").value.trim();save();if(!$("win").hidden)updateOut()};
+render();
+</script>
+</body>
+</html>

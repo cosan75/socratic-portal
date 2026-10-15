@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>질문 투표판</title>
+<style>[hidden]{display:none!important}img{max-width:100%}</style>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;600&display=swap">
+<style>
+/* Layout: 교사 화면(프로젝터). 위 설정 띠, 가운데 질문 카드 격자(층 색 띠), 아래 질문 받기 */
+:root{
+  --bg:#eef0ec;--panel:#f8f9f6;--ink:#1f2a2a;--muted:#5f6b69;--line:#c9cfc9;
+  --aegean:#1f5f8b;--aegean-soft:#d6e5ef;--olive:#6b7a3a;--used:#d9dcd6;--warn:#9a4a1f;--ochre:#b8862b;
+  --f1:#1f5f8b;--f2:#2f7a55;--f3:#6a4a8c;
+  --display:"Gowun Batang","Nanum Myeongjo",serif;
+  --body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--used:#2a3233;--warn:#e19a6f;--ochre:#d9ac55;
+  --f1:#6fb0dc;--f2:#6cc497;--f3:#b494d8;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#141a1b;--panel:#1c2324;--ink:#e6ebe8;--muted:#9aa6a3;--line:#33403f;
+  --aegean:#6fb0dc;--aegean-soft:#1d3444;--olive:#a9b86c;--used:#2a3233;--warn:#e19a6f;--ochre:#d9ac55;
+  --f1:#6fb0dc;--f2:#6cc497;--f3:#b494d8;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:18px 40px}
+.wrap{max-width:1200px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:12px;border-bottom:1px solid var(--line);padding-bottom:12px}
+.eyebrow{font-size:.72rem;letter-spacing:.08em;color:var(--muted)}
+h1{font-family:var(--display);font-size:1.7rem;margin:0}
+h2{font-family:var(--display);font-size:1.1rem;margin:0}
+.note{font-size:.82rem;color:var(--muted)}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible{outline:2px solid var(--aegean);outline-offset:2px}
+input[type=text],input[type=number],textarea,select{font:inherit;border:1px solid var(--line);border-radius:6px;background:var(--panel);color:var(--ink);padding:7px}
+textarea{width:100%}
+.btn{border:1px solid var(--line);background:var(--bg);padding:7px 12px;border-radius:6px;font-size:.9rem}
+.btn.primary{background:var(--aegean);border-color:var(--aegean);color:var(--panel)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+.topic{font-family:var(--display);font-size:1.2rem;color:var(--aegean)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-top:5px solid var(--f);border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card.sel{box-shadow:0 0 0 2px var(--aegean)}
+.card.win{box-shadow:0 0 0 3px var(--ochre)}
+.card .q{font-family:var(--display);font-size:1.18rem;line-height:1.45;margin:0;word-break:break-word}
+.card .q[contenteditable="true"]{outline:1px dashed var(--line);border-radius:4px}
+.meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.78rem;color:var(--muted)}
+.fl{border:1px solid var(--f);color:var(--f);border-radius:999px;padding:0 8px;background:transparent;font-size:.76rem}
+.votes{display:flex;align-items:center;gap:8px;margin-top:auto}
+.vnum{font-family:var(--display);font-size:1.8rem;min-width:1.6em;text-align:center;font-variant-numeric:tabular-nums}
+.vbtn{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--bg);font-size:1.1rem}
+.mini{border:0;background:none;color:var(--muted);font-size:.8rem;text-decoration:underline;padding:0}
+.rank{font-size:.8rem;color:var(--ochre);font-weight:600}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.msg{font-size:.88rem;color:var(--warn);min-height:1.3em;margin:0}
+.sample{font-size:.75rem;color:var(--olive);border:1px solid var(--olive);border-radius:4px;padding:1px 6px}
+</style>
+
+<div class="wrap">
+  <header>
+    <div><span class="eyebrow">4차시 · 질문 펼치기와 고르기 (P4C)</span><h1>질문 투표판</h1></div>
+    <div class="row"><span class="note">탐구 주제</span><input type="text" id="topic" style="width:min(320px,70vw)"></div>
+  </header>
+
+  <div class="bar">
+    <div class="row">
+      <label class="note" for="mode">투표 방식</label>
+      <select id="mode">
+        <option value="1">1인 1표</option><option value="2">1인 2표</option><option value="3">1인 3표</option><option value="0">무제한</option>
+      </select>
+      <label class="note" for="people">학생 수</label>
+      <input type="number" id="people" min="1" max="60" style="width:5em">
+      <span class="note" id="tally"></span>
+    </div>
+    <div class="row">
+      <button class="btn" id="mergeBtn" disabled>고른 질문 합치기</button>
+      <button class="btn primary" id="revealBtn">결과 공개</button>
+      <button class="btn" id="clearVotes">표 지우기</button>
+      <span id="sampleTag"></span>
+    </div>
+  </div>
+  <p class="msg" id="msg" aria-live="polite"></p>
+
+  <div class="cards" id="cards"></div>
+
+  <section class="panel">
+    <h2>질문 받기</h2>
+    <p class="note" style="margin:0">⟦질문⟧ 줄(코치·분류 카드·아테네 시민에서 복사), "모둠 | 질문", 또는 질문만 한 줄씩 붙여 넣으세요. 비슷한 질문은 카드를 두 개 이상 고른 뒤 '합치기'로 묶어요.</p>
+    <textarea id="input" rows="5" placeholder="1모둠 | 착한 거짓말은 누가 정할까?"></textarea>
+    <div class="row"><button class="btn primary" id="addBtn">질문 펼치기</button><button class="btn" id="newBtn">새 투표 시작</button></div>
+  </section>
+</div>
+
+<script>
+const TY={clar:1,evid:2,assm:2,view:3,cons:3,meta:3};
+const FLOOR={1:"사실 확인",2:"연결·설명",3:"전이·주장"};
+const RULES=[
+ ["meta",[/이\s*질문/,/질문이\s*왜/,/먼저\s*(답|알아)/,/무엇을\s*물/,/어떤\s*질문/,/질문\s*자체/]],
+ ["cons",[/만약/,/모두가/,/모든\s*사람이/,/다들/,/그러면\s*어떻게/,/어떻게\s*될/,/결과/,/앞으로/,/계속\s*하면/,/나중에/,/영향/]],
+ ["view",[/다른\s*사람/,/반대/,/입장/,/상대/,/관점/,/다르게\s*(볼|생각)/,/(이|가)라면\s*어떻게\s*생각/,/의\s*마음/,/기분/]],
+ ["assm",[/당연/,/항상/,/언제나/,/꼭\s/,/반드시/,/원래/,/전제/,/가정/,/모든\s*경우/,/무조건/]],
+ ["evid",[/왜/,/근거/,/어떻게\s*알/,/증거/,/이유/,/확실/,/믿을\s*수/,/어떻게\s*확인/]],
+ ["clar",[/뜻/,/의미/,/예를\s*들/,/무슨\s*말/,/정확히/,/무엇/,/뭐야/,/뭘까/,/란\s*뭐/,/이란/]]
+];
+function classify(q){const s=q.replace(/\s+/g," ");for(const [k,res] of RULES){if(res.some(r=>r.test(s)))return k}return null}
+const KEY="question-vote-v1";
+function sample(){return {example:true,topic:"착한 거짓말은 괜찮을까?",mode:"2",people:12,reveal:false,cards:[
+ {id:1,text:"착한 거짓말은 누가 정할까?",type:"meta",from:["1모둠"],votes:3},
+ {id:2,text:"모두가 착한 거짓말을 하면 서로 믿을 수 있을까?",type:"cons",from:["건우","2모둠"],votes:7},
+ {id:3,text:"거짓말을 들은 사람이 나중에 알게 되면 기분이 어떨까?",type:"view",from:["나연"],votes:5},
+ {id:4,text:"착한 거짓말이 상대를 지켜 준다는 걸 어떻게 알 수 있어?",type:"evid",from:["시우"],votes:4},
+ {id:5,text:"착한 거짓말이란 정확히 뭐야?",type:"clar",from:["3모둠"],votes:1},
+ {id:6,text:"거짓말이 들키지 않는다고 당연하게 생각한 거 아닐까?",type:"assm",from:["4모둠"],votes:4}]}}
+let S;try{S=JSON.parse(localStorage.getItem(KEY)||"null")}catch(e){}
+if(!S)S=sample();
+let sel=new Set(),editing=null;
+const $=id=>document.getElementById(id);
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const fl=c=>c.type?TY[c.type]:1;
+function touch(){if(S.example){S.example=false}}
+
+function render(){
+  $("topic").value=S.topic;$("mode").value=S.mode;$("people").value=S.people||"";
+  $("sampleTag").innerHTML=S.example?'<span class="sample">예시 투표</span>':"";
+  const total=S.cards.reduce((a,c)=>a+c.votes,0);const cap=+S.mode&&S.people?S.mode*S.people:0;
+  $("tally").textContent=`모인 표 ${total}${cap?` / 최대 ${cap}`:""}`;
+  $("tally").style.color=cap&&total>cap?"var(--warn)":"";
+  $("revealBtn").textContent=S.reveal?"결과 숨기기":"결과 공개";
+  $("mergeBtn").disabled=sel.size<2;
+  const list=S.reveal?[...S.cards].sort((a,b)=>b.votes-a.votes):S.cards;
+  const top=S.reveal&&list.length?list[0].votes:-1;
+  $("cards").innerHTML=list.length?list.map((c,i)=>{const f=fl(c);const win=S.reveal&&c.votes===top&&top>0;
+    return `<article class="card ${sel.has(c.id)?"sel":""} ${win?"win":""}" style="--f:var(--f${f})">
+      ${S.reveal?`<span class="rank">${i+1}위${win?" · 서클 토론 후보":""}</span>`:""}
+      <p class="q" data-id="${c.id}" ${editing===c.id?'contenteditable="true"':""}>${esc(c.text)}</p>
+      <div class="meta"><span class="fl">${f}층 ${FLOOR[f]}</span><span>${esc(c.from.join(", ")||"")}</span></div>
+      <div class="row" style="gap:12px">
+        <label class="note"><input type="checkbox" data-sel="${c.id}" ${sel.has(c.id)?"checked":""}> 합칠 질문</label>
+        <button class="mini" data-edit="${c.id}">${editing===c.id?"다듬기 끝":"말 다듬기"}</button>
+        ${win?`<button class="mini" data-pick="${c.id}">이 질문으로 서클 열기</button>`:""}
+      </div>
+      <div class="votes"><button class="vbtn" data-v="${c.id}" data-d="-1" aria-label="표 빼기">−</button>
+      <span class="vnum">${S.reveal?c.votes:"?"}</span>
+      <button class="vbtn" data-v="${c.id}" data-d="1" aria-label="표 더하기">+</button>
+      <span class="note">${S.reveal?"":"손든 수를 세어 + 눌러요"}</span></div>
+    </article>`}).join(""):`<p class="note">아직 펼친 질문이 없어요. 아래 '질문 받기'에 붙여 넣으세요.</p>`;
+  $("cards").querySelectorAll("[data-sel]").forEach(x=>x.onchange=()=>{const id=+x.dataset.sel;x.checked?sel.add(id):sel.delete(id);render()});
+  $("cards").querySelectorAll("[data-v]").forEach(b=>b.onclick=()=>{touch();const c=S.cards.find(c=>c.id===+b.dataset.v);c.votes=Math.max(0,c.votes+ +b.dataset.d);save();render()});
+  $("cards").querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{const id=+b.dataset.edit;
+    if(editing===id){const el=$("cards").querySelector(`.q[data-id="${id}"]`);const v=el.textContent.trim();const c=S.cards.find(c=>c.id===id);
+      if(v){touch();c.text=v;c.type=classify(v)||c.type}editing=null;save()}else editing=id;render();
+    if(editing){const el=$("cards").querySelector(`.q[data-id="${id}"]`);el&&el.focus()}});
+  $("cards").querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>pick(+b.dataset.pick));
+}
+function parse(text){
+  const out=[];
+  text.split("\n").map(l=>l.trim()).filter(Boolean).forEach(L=>{
+    let m=L.match(/⟦질문⟧\s*([^|]+)\|\s*(\w+)\s*\|([^|]+)(\|.*)?/);
+    if(m){out.push({text:m[3].trim(),type:TY[m[2].trim()]?m[2].trim():classify(m[3]),from:[m[1].trim()]});return}
+    if(/^성찰\s*:/.test(L))return;
+    m=L.match(/^([^|]{1,15})\|(.+)$/);
+    if(m){out.push({text:m[2].trim(),type:classify(m[2]),from:[m[1].trim()]});return}
+    const t=L.replace(/^\s*\d+[.)]\s*/,"");if(t.length>3)out.push({text:t,type:classify(t),from:[]});
+  });
+  return out;
+}
+$("addBtn").onclick=()=>{
+  const items=parse($("input").value);if(!items.length){$("msg").textContent="읽을 수 있는 질문이 없어요.";return}
+  if(S.example){S={topic:S.topic,mode:S.mode,people:S.people,reveal:false,cards:[]}}
+  let id=Math.max(0,...S.cards.map(c=>c.id));let added=0,same=0;
+  items.forEach(it=>{const dup=S.cards.find(c=>c.text===it.text);
+    if(dup){dup.from=[...new Set([...dup.from,...it.from])];same++}else{S.cards.push({id:++id,votes:0,...it});added++}});
+  $("input").value="";save();$("msg").textContent=`${added}개를 펼쳤어요.${same?` 똑같은 질문 ${same}개는 하나로 묶었어요.`:""}`;render();
+};
+$("mergeBtn").onclick=()=>{
+  touch();const cs=S.cards.filter(c=>sel.has(c.id));if(cs.length<2)return;
+  const keep=cs.reduce((a,c)=>fl(c)>fl(a)?c:a,cs[0]);
+  keep.from=[...new Set(cs.flatMap(c=>c.from))];keep.votes=cs.reduce((a,c)=>a+c.votes,0);
+  S.cards=S.cards.filter(c=>c===keep||!sel.has(c.id));sel.clear();editing=keep.id;save();
+  $("msg").textContent="질문을 하나로 합쳤어요. 합친 질문의 말을 다듬어 주세요.";render();
+};
+$("revealBtn").onclick=()=>{S.reveal=!S.reveal;save();render()};
+$("clearVotes").onclick=()=>{touch();S.cards.forEach(c=>c.votes=0);S.reveal=false;save();render()};
+$("newBtn").onclick=()=>{S={topic:S.topic,mode:S.mode,people:S.people,reveal:false,cards:[]};sel.clear();save();$("msg").textContent="새 투표를 시작했어요.";render()};
+$("topic").oninput=()=>{touch();S.topic=$("topic").value;save()};
+$("mode").onchange=()=>{S.mode=$("mode").value;save();render()};
+$("people").oninput=()=>{S.people=+$("people").value||0;save();render()};
+function pick(id){
+  const c=S.cards.find(c=>c.id===id);let note="";
+  try{const k="socratic-circle-v1";const b=JSON.parse(localStorage.getItem(k)||"null");
+    if(b){b.topic=c.text;localStorage.setItem(k,JSON.stringify(b));note=" 소크라테스 서클 보드의 탐구 질문도 바꿔 두었어요."}}catch(e){}
+  const done=()=>$("msg").textContent=`"${c.text}"을(를) 서클 토론 질문으로 정했어요.${note||" 질문을 복사했으니 서클 보드 설정에 붙여 넣으세요."}`;
+  try{navigator.clipboard.writeText(c.text).then(done,done)}catch(e){done()}
+}
+render();
+</script>
+</body>
+</html>
